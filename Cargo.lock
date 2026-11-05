@@ -295,7 +295,7 @@ dependencies = [
 [[package]]
 name = "aptcad-color"
 version = "0.17.0"
-source = "git+https://github.com/Anuj09k/AptCAD?rev=31a90102e54cf5a347931be07d7b135fa4868c05#31a90102e54cf5a347931be07d7b135fa4868c05"
+source = "git+https://github.com/Anuj09k/AptCAD?rev=cf578d233afa4e9aa6582405b975e576e8c90dd2#cf578d233afa4e9aa6582405b975e576e8c90dd2"
 dependencies = [
  "serde",
 ]
@@ -303,7 +303,7 @@ dependencies = [
 [[package]]
 name = "aptcad-constraints"
 version = "0.17.0"
-source = "git+https://github.com/Anuj09k/AptCAD?rev=31a90102e54cf5a347931be07d7b135fa4868c05#31a90102e54cf5a347931be07d7b135fa4868c05"
+source = "git+https://github.com/Anuj09k/AptCAD?rev=cf578d233afa4e9aa6582405b975e576e8c90dd2#cf578d233afa4e9aa6582405b975e576e8c90dd2"
 dependencies = [
  "aptcad-doc",
  "aptcad-geom",
@@ -314,7 +314,7 @@ dependencies = [
 [[package]]
 name = "aptcad-doc"
 version = "0.17.0"
-source = "git+https://github.com/Anuj09k/AptCAD?rev=31a90102e54cf5a347931be07d7b135fa4868c05#31a90102e54cf5a347931be07d7b135fa4868c05"
+source = "git+https://github.com/Anuj09k/AptCAD?rev=cf578d233afa4e9aa6582405b975e576e8c90dd2#cf578d233afa4e9aa6582405b975e576e8c90dd2"
 dependencies = [
  "aptcad-color",
  "aptcad-geom",
@@ -326,7 +326,7 @@ dependencies = [
 [[package]]
 name = "aptcad-dwg"
 version = "0.17.0"
-source = "git+https://github.com/Anuj09k/AptCAD?rev=31a90102e54cf5a347931be07d7b135fa4868c05#31a90102e54cf5a347931be07d7b135fa4868c05"
+source = "git+https://github.com/Anuj09k/AptCAD?rev=cf578d233afa4e9aa6582405b975e576e8c90dd2#cf578d233afa4e9aa6582405b975e576e8c90dd2"
 dependencies = [
  "acadrust",
  "log",
@@ -335,7 +335,7 @@ dependencies = [
 [[package]]
 name = "aptcad-dxf"
 version = "0.17.0"
-source = "git+https://github.com/Anuj09k/AptCAD?rev=31a90102e54cf5a347931be07d7b135fa4868c05#31a90102e54cf5a347931be07d7b135fa4868c05"
+source = "git+https://github.com/Anuj09k/AptCAD?rev=cf578d233afa4e9aa6582405b975e576e8c90dd2#cf578d233afa4e9aa6582405b975e576e8c90dd2"
 dependencies = [
  "encoding_rs",
  "log",
@@ -345,7 +345,7 @@ dependencies = [
 [[package]]
 name = "aptcad-engine"
 version = "0.17.0"
-source = "git+https://github.com/Anuj09k/AptCAD?rev=31a90102e54cf5a347931be07d7b135fa4868c05#31a90102e54cf5a347931be07d7b135fa4868c05"
+source = "git+https://github.com/Anuj09k/AptCAD?rev=cf578d233afa4e9aa6582405b975e576e8c90dd2#cf578d233afa4e9aa6582405b975e576e8c90dd2"
 dependencies = [
  "aptcad-color",
  "aptcad-constraints",
@@ -366,7 +366,7 @@ dependencies = [
 [[package]]
 name = "aptcad-fonts"
 version = "0.17.0"
-source = "git+https://github.com/Anuj09k/AptCAD?rev=31a90102e54cf5a347931be07d7b135fa4868c05#31a90102e54cf5a347931be07d7b135fa4868c05"
+source = "git+https://github.com/Anuj09k/AptCAD?rev=cf578d233afa4e9aa6582405b975e576e8c90dd2#cf578d233afa4e9aa6582405b975e576e8c90dd2"
 dependencies = [
  "aptcad-geom",
  "harfrust 0.14.0",
@@ -378,7 +378,7 @@ dependencies = [
 [[package]]
 name = "aptcad-geom"
 version = "0.17.0"
-source = "git+https://github.com/Anuj09k/AptCAD?rev=31a90102e54cf5a347931be07d7b135fa4868c05#31a90102e54cf5a347931be07d7b135fa4868c05"
+source = "git+https://github.com/Anuj09k/AptCAD?rev=cf578d233afa4e9aa6582405b975e576e8c90dd2#cf578d233afa4e9aa6582405b975e576e8c90dd2"
 dependencies = [
  "serde",
 ]
@@ -386,7 +386,7 @@ dependencies = [
 [[package]]
 name = "aptcad-io"
 version = "0.17.0"
-source = "git+https://github.com/Anuj09k/AptCAD?rev=31a90102e54cf5a347931be07d7b135fa4868c05#31a90102e54cf5a347931be07d7b135fa4868c05"
+source = "git+https://github.com/Anuj09k/AptCAD?rev=cf578d233afa4e9aa6582405b975e576e8c90dd2#cf578d233afa4e9aa6582405b975e576e8c90dd2"
 dependencies = [
  "aptcad-color",
  "aptcad-doc",
@@ -406,7 +406,7 @@ dependencies = [
 [[package]]
 name = "aptcad-render"
 version = "0.17.0"
-source = "git+https://github.com/Anuj09k/AptCAD?rev=31a90102e54cf5a347931be07d7b135fa4868c05#31a90102e54cf5a347931be07d7b135fa4868c05"
+source = "git+https://github.com/Anuj09k/AptCAD?rev=cf578d233afa4e9aa6582405b975e576e8c90dd2#cf578d233afa4e9aa6582405b975e576e8c90dd2"
 dependencies = [
  "aptcad-color",
  "aptcad-doc",
@@ -420,7 +420,7 @@ dependencies = [
 [[package]]
 name = "aptcad-ui-egui"
 version = "0.17.0"
-source = "git+https://github.com/Anuj09k/AptCAD?rev=31a90102e54cf5a347931be07d7b135fa4868c05#31a90102e54cf5a347931be07d7b135fa4868c05"
+source = "git+https://github.com/Anuj09k/AptCAD?rev=cf578d233afa4e9aa6582405b975e576e8c90dd2#cf578d233afa4e9aa6582405b975e576e8c90dd2"
 dependencies = [
  "aptcad-color",
  "aptcad-doc",
