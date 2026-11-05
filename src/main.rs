@@ -624,7 +624,10 @@ mod tests {
     #[test]
     fn both_modes_keep_the_keymap_picked_in_the_one_shown() {
         use aptcad_ui_egui::keys::Keymap;
-        let mut cad = CadApp::new(aptcad_engine::Session::new(), aptcad_ui_egui::Services::default());
+        let mut cad = CadApp::new(
+            aptcad_engine::Session::new(),
+            aptcad_ui_egui::Services::default(),
+        );
         let mut bim = BimApp::new(aptbim_core::engine::Session::new());
         cad.ui.keymap = Keymap::Classic;
         share_keymap(Mode::Cad, &mut cad, &mut bim);
