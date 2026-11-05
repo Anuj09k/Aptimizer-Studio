@@ -221,7 +221,7 @@ checksum = "330a5ed07fa54e4702c9d6c4174f74427fc0ef6e214bbd677ae50a5099946470"
 [[package]]
 name = "aptbim-core"
 version = "0.10.0"
-source = "git+https://github.com/Anuj09k/AptBIM-?rev=06a60e26d802af200a48347027c04aa471d563bc#06a60e26d802af200a48347027c04aa471d563bc"
+source = "git+https://github.com/Anuj09k/AptBIM-?rev=afe9af5a80219e2027997e942bb293298ec590f2#afe9af5a80219e2027997e942bb293298ec590f2"
 dependencies = [
  "aptbim-i18n",
  "encoding_rs",
@@ -239,7 +239,7 @@ dependencies = [
 [[package]]
 name = "aptbim-dwg"
 version = "0.10.0"
-source = "git+https://github.com/Anuj09k/AptBIM-?rev=06a60e26d802af200a48347027c04aa471d563bc#06a60e26d802af200a48347027c04aa471d563bc"
+source = "git+https://github.com/Anuj09k/AptBIM-?rev=afe9af5a80219e2027997e942bb293298ec590f2#afe9af5a80219e2027997e942bb293298ec590f2"
 dependencies = [
  "acadrust",
  "aptbim-core",
@@ -248,12 +248,12 @@ dependencies = [
 [[package]]
 name = "aptbim-i18n"
 version = "0.10.0"
-source = "git+https://github.com/Anuj09k/AptBIM-?rev=06a60e26d802af200a48347027c04aa471d563bc#06a60e26d802af200a48347027c04aa471d563bc"
+source = "git+https://github.com/Anuj09k/AptBIM-?rev=afe9af5a80219e2027997e942bb293298ec590f2#afe9af5a80219e2027997e942bb293298ec590f2"
 
 [[package]]
 name = "aptbim-rvt"
 version = "0.10.0"
-source = "git+https://github.com/Anuj09k/AptBIM-?rev=06a60e26d802af200a48347027c04aa471d563bc#06a60e26d802af200a48347027c04aa471d563bc"
+source = "git+https://github.com/Anuj09k/AptBIM-?rev=afe9af5a80219e2027997e942bb293298ec590f2#afe9af5a80219e2027997e942bb293298ec590f2"
 dependencies = [
  "aptbim-core",
  "cfb",
@@ -265,7 +265,7 @@ dependencies = [
 [[package]]
 name = "aptbim-ui-egui"
 version = "0.10.0"
-source = "git+https://github.com/Anuj09k/AptBIM-?rev=06a60e26d802af200a48347027c04aa471d563bc#06a60e26d802af200a48347027c04aa471d563bc"
+source = "git+https://github.com/Anuj09k/AptBIM-?rev=afe9af5a80219e2027997e942bb293298ec590f2#afe9af5a80219e2027997e942bb293298ec590f2"
 dependencies = [
  "aptbim-core",
  "aptbim-i18n",
@@ -283,7 +283,7 @@ dependencies = [
 [[package]]
 name = "aptbim-update"
 version = "0.10.0"
-source = "git+https://github.com/Anuj09k/AptBIM-?rev=06a60e26d802af200a48347027c04aa471d563bc#06a60e26d802af200a48347027c04aa471d563bc"
+source = "git+https://github.com/Anuj09k/AptBIM-?rev=afe9af5a80219e2027997e942bb293298ec590f2#afe9af5a80219e2027997e942bb293298ec590f2"
 dependencies = [
  "ring",
  "semver",

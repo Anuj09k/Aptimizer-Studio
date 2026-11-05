@@ -89,6 +89,25 @@ struct Studio {
     bim: BimApp,
     /// The two modes' icons for the bar, made on the first frame.
     icons: Option<[TextureHandle; 2]>,
+    /// The window title last sent, so it is sent again only when it changes.
+    title: String,
+}
+
+/// The window's title: what the app shown names (the drawing or the project and view, with `*` while unsaved), then the studio.
+fn studio_title(app: &str) -> String {
+    if app.is_empty() {
+        "Aptimizer Studio".to_string()
+    } else {
+        format!("{app} — Aptimizer Studio")
+    }
+}
+
+/// What AptCAD's mode puts in the title: its drawing, `*` while unsaved, and its name.
+fn cad_title(name: Option<&str>, dirty: bool) -> String {
+    match name {
+        Some(name) => format!("{name}{} · AptCAD", if dirty { "*" } else { "" }),
+        None => "AptCAD".to_string(),
+    }
 }
 
 impl Studio {
@@ -103,6 +122,27 @@ impl Studio {
             Mode::Bim => self.bim.restyle(ctx),
         }
         ctx.request_repaint();
+    }
+
+    /// The studio owns the window's title. AptBIM sets it to its own whenever its project or view changes; this runs after the
+    /// app each frame, so the studio's title is the last asked for, and is sent again whenever the app's part changes.
+    fn keep_title(&mut self, ctx: &egui::Context) {
+        let app = match self.mode {
+            Mode::Bim => self.bim.window_title().to_string(),
+            Mode::Cad => {
+                let state = self.cad.session.state().ok();
+                cad_title(
+                    state.map(|d| d.title.as_str()),
+                    state.is_some_and(|d| d.is_dirty()),
+                )
+            }
+        };
+        let title = studio_title(&app);
+        // AptBIM sends its title when it changes; its change is ours too, so ours always follows it in the same frame.
+        if title != self.title {
+            ctx.send_viewport_cmd(egui::ViewportCommand::Title(title.clone()));
+            self.title = title;
+        }
     }
 
     fn icons(&mut self, ctx: &egui::Context) -> &[TextureHandle; 2] {
@@ -209,7 +249,9 @@ impl eframe::App for Studio {
             Mode::Cad => self.cad.guarded_ui(ui),
             Mode::Bim => eframe::App::ui(&mut self.bim, ui, frame),
         }
-        self.mode_bar(&ui.ctx().clone(), strip);
+        let ctx = ui.ctx().clone();
+        self.mode_bar(&ctx, strip);
+        self.keep_title(&ctx);
     }
 
     fn on_exit(&mut self) {
@@ -499,6 +541,7 @@ fn main() -> std::process::ExitCode {
                 cad,
                 bim,
                 icons: None,
+                title: String::new(),
             };
             // Whichever app starts applies its look on its first frame anyway; asked again for certainty.
             match start_mode {
@@ -537,6 +580,27 @@ mod tests {
             Ok(Some(Mode::Cad))
         );
         assert_eq!(parse_args(Vec::<String>::new()), Ok(Launch::default()));
+    }
+
+    #[test]
+    fn the_title_names_what_the_mode_shows_then_the_studio() {
+        assert_eq!(
+            studio_title("Sample House · Floor Plan: Level 1 · AptBIM"),
+            "Sample House · Floor Plan: Level 1 · AptBIM — Aptimizer Studio"
+        );
+        assert_eq!(
+            studio_title(&cad_title(Some("plan.dxf"), true)),
+            "plan.dxf* · AptCAD — Aptimizer Studio"
+        );
+        assert_eq!(
+            studio_title(&cad_title(Some("plan.dxf"), false)),
+            "plan.dxf · AptCAD — Aptimizer Studio"
+        );
+        assert_eq!(
+            studio_title(&cad_title(None, false)),
+            "AptCAD — Aptimizer Studio"
+        );
+        assert_eq!(studio_title(""), "Aptimizer Studio");
     }
 
     #[test]
