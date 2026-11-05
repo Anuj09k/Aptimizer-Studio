@@ -83,4 +83,25 @@ so the state holds:
 | date | prompt | model | first answer | after fixes | notes |
 |---|---|---|---|---|---|
 | 2026-11-05 | 2 | reference answers | 17 / 17 | 17 / 17 | the set itself: every case can pass |
-| 2026-11-05 | 2 | stand-in (fixed answers) | 1 / 9 cad | 1 / 9 cad | the live path end to end over HTTP; no real model run yet |
+| 2026-11-05 | 2 | stand-in (fixed answers) | 1 / 9 cad | 1 / 9 cad | the live path end to end over HTTP |
+| 2026-11-05 | 2 | gemini-4-argon | 14 / 17 | 14 / 17 | 2 rate-limited (three models run at once); stopped to look up a wall's length for the windows |
+| 2026-11-05 | 2 | gemini-3.5-flash | 14 / 17 | 14 / 17 | 1 rate-limited; same windows look-up; arrayed a just-drawn circle, which isn't selected (copied nothing) |
+| 2026-11-05 | 2 | gemini-3.8-flash | 13 / 17 | 13 / 17 | 3 timed out on rate limits; same windows look-up |
+| 2026-11-05 | 3 | gemini-4-argon | 16 / 17 | 17 / 17 | prompt 3 and the AptBIM state with where elements are; the miss: a closed wall loop that repeats its first point, which AptBIM refused, fixed by Fix it |
+| 2026-11-05 | 3 | gemini-3.5-flash | 16 / 17 | 17 / 17 | the same closed-loop miss, fixed by Fix it |
+| 2026-11-05 | 3 | gemini-3.8-flash | 16 / 17 | 17 / 17 | the same closed-loop miss, fixed by Fix it (four separate walls) |
+| 2026-11-05 | 3 | gemini-3.5-flash | 17 / 17 | 17 / 17 | with AptBIM closing a loop once (2b2db2d) |
+| 2026-11-05 | 3 | gemini-3.8-flash | 17 / 17 | 17 / 17 | with AptBIM closing a loop once |
+| 2026-11-05 | 3 | gemini-4-argon | 17 / 17 | 17 / 17 | with AptBIM closing a loop once; its 8 modelling cases run again after Google reported Argon unavailable on two of them (the server's fallback, Flash-Lite, gave an unreadable answer on one) |
+
+What the runs taught:
+- A model asks, or looks things up, when the state lacks what it needs. Every model stopped to read a wall's length
+  until the AptBIM state said where each wall runs.
+- When every model writes something the same way (a closed loop back to its first point), change the app, not the
+  prompt. AptBIM now closes such a loop once.
+- Fix it pays: each first-answer miss in round 3 was corrected by the one automatic fix.
+- On this set the three models score the same; Argon was the one Google reported busy, and its fallback chain ends in
+  Flash-Lite models whose answers are weaker. Flash is the better default for the assistant until the set grows hard
+  enough to tell them apart.
+- Run one model at a time. Three at once ran into Google's per-minute limits (429 and 503 answers), which the report
+  shows as "no answer".

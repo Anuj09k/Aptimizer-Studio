@@ -153,9 +153,88 @@ impl Host for aptbim_ui_egui::BimApp {
                 of.push(json!(id));
             }
         }
+        // Where the first few of each are and what they are, so "a window 1500 mm from each end" needs no look-up.
+        let categories: Vec<String> = ids
+            .keys()
+            .filter(|c| !NOT_LISTED.contains(c))
+            .map(|c| c.to_string())
+            .collect();
         brief["ids"] = json!(ids);
+        let mut per = BRIEF_ELEMENTS;
+        loop {
+            let mut listed = serde_json::Map::new();
+            for c in &categories {
+                let found = self
+                    .run_command("elements", json!({"category": c, "limit": per}))
+                    .unwrap_or(Value::Null);
+                let of: Vec<Value> = found["elements"]
+                    .as_array()
+                    .into_iter()
+                    .flatten()
+                    .map(compact)
+                    .collect();
+                listed.insert(c.clone(), Value::Array(of));
+            }
+            brief["elements"] = Value::Object(listed);
+            if per <= 1 || brief.to_string().len() <= BRIEF_CHARS {
+                break;
+            }
+            per /= 2;
+        }
         brief
     }
+}
+
+/// Categories the brief doesn't list one by one: levels (listed already) and views.
+const NOT_LISTED: [&str; 6] = [
+    "level",
+    "planview",
+    "schedule",
+    "section",
+    "elevation",
+    "sheet",
+];
+/// The elements of each category the brief describes, fewer when the brief would run past BRIEF_CHARS.
+const BRIEF_ELEMENTS: usize = 12;
+const BRIEF_CHARS: usize = 10_000;
+/// What the brief keeps of an element: what a request names or places by. GUIDs (its level's, its host's) say
+/// nothing to the model, and every number is rounded to a tenth.
+const KEPT: [&str; 15] = [
+    "id",
+    "name",
+    "number",
+    "mark",
+    "type",
+    "start",
+    "end",
+    "at",
+    "point",
+    "length",
+    "thickness",
+    "height",
+    "width",
+    "sill",
+    "area_m2",
+];
+
+fn compact(element: &Value) -> Value {
+    fn round(v: &Value) -> Value {
+        match v {
+            Value::Number(n) => n
+                .as_f64()
+                .filter(|f| f.fract() != 0.0)
+                .map_or_else(|| v.clone(), |f| json!((f * 10.0).round() / 10.0)),
+            Value::Array(a) => Value::Array(a.iter().map(round).collect()),
+            other => other.clone(),
+        }
+    }
+    let mut out = serde_json::Map::new();
+    for k in KEPT {
+        if let Some(v) = element.get(k).filter(|v| !v.is_null()) {
+            out.insert(k.to_string(), round(v));
+        }
+    }
+    Value::Object(out)
 }
 
 /// The ids of each category the brief lists.
@@ -355,6 +434,35 @@ mod tests {
         assert_eq!(walls(&mut app), start + 2);
         assert!(app.undo(2).is_ok());
         assert_eq!(walls(&mut app), start);
+    }
+
+    #[test]
+    fn the_bim_brief_says_where_the_walls_are_and_stays_within_its_length() {
+        let mut app = bim();
+        let _ = app.run_command("wall", json!({"points": [[0, 0], [6000, 0]]}));
+        let brief = app.state();
+        let wall = &brief["elements"]["wall"][0];
+        assert_eq!(wall["start"], json!([0.0, 0.0]), "{brief}");
+        assert_eq!(wall["end"], json!([6000.0, 0.0]), "{brief}");
+        assert!(
+            wall.get("guid").is_none() && wall["type"].is_string(),
+            "{wall}"
+        );
+        for i in 0..150 {
+            let y = 1000 * (i + 1);
+            let _ = app.run_command("wall", json!({"points": [[0, y], [6000, y]]}));
+        }
+        let brief = app.state();
+        assert!(
+            brief.to_string().len() <= BRIEF_CHARS,
+            "{} characters",
+            brief.to_string().len()
+        );
+        assert!(
+            brief["elements"]["wall"]
+                .as_array()
+                .is_some_and(|w| !w.is_empty())
+        );
     }
 
     #[test]
