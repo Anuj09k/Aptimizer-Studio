@@ -93,6 +93,23 @@ struct Studio {
     title: String,
 }
 
+/// One keymap for both modes: the one the mode shown has (where Options or Settings changed it) becomes the other's.
+fn share_keymap(mode: Mode, cad: &mut CadApp, bim: &mut BimApp) {
+    match mode {
+        Mode::Cad => {
+            let code = cad.ui.keymap.as_str();
+            if bim.keymap_code() != code {
+                bim.set_keymap_code(code);
+            }
+        }
+        Mode::Bim => {
+            if let Some(keymap) = aptcad_ui_egui::keys::Keymap::parse(bim.keymap_code()) {
+                cad.ui.keymap = keymap;
+            }
+        }
+    }
+}
+
 /// The window's title: what the app shown names (the drawing or the project and view, with `*` while unsaved), then the studio.
 fn studio_title(app: &str) -> String {
     if app.is_empty() {
@@ -249,6 +266,7 @@ impl eframe::App for Studio {
             Mode::Cad => self.cad.guarded_ui(ui),
             Mode::Bim => eframe::App::ui(&mut self.bim, ui, frame),
         }
+        share_keymap(self.mode, &mut self.cad, &mut self.bim);
         let ctx = ui.ctx().clone();
         self.mode_bar(&ctx, strip);
         self.keep_title(&ctx);
@@ -601,6 +619,19 @@ mod tests {
             "AptCAD — Aptimizer Studio"
         );
         assert_eq!(studio_title(""), "Aptimizer Studio");
+    }
+
+    #[test]
+    fn both_modes_keep_the_keymap_picked_in_the_one_shown() {
+        use aptcad_ui_egui::keys::Keymap;
+        let mut cad = CadApp::new(aptcad_engine::Session::new(), aptcad_ui_egui::Services::default());
+        let mut bim = BimApp::new(aptbim_core::engine::Session::new());
+        cad.ui.keymap = Keymap::Classic;
+        share_keymap(Mode::Cad, &mut cad, &mut bim);
+        assert_eq!(bim.keymap_code(), "classic");
+        bim.set_keymap_code("aptimizer");
+        share_keymap(Mode::Bim, &mut cad, &mut bim);
+        assert_eq!(cad.ui.keymap, Keymap::Aptimizer);
     }
 
     #[test]
