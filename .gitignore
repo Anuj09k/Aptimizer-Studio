@@ -1,1 +1,3 @@
 /target
+# Runs of the assistant test set (aptimizer-studio eval); their summary goes in docs/assistant-test-set.md.
+/eval/results

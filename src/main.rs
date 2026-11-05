@@ -14,6 +14,8 @@
 )]
 
 mod assistant;
+mod eval;
+mod host;
 
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
@@ -100,10 +102,20 @@ struct Studio {
     title: String,
     /// The AI assistant panel (see `assistant`).
     assistant: assistant::Assistant,
+    /// The assistant turns that ran, newest last, while Undo all can take them back one by one (see `host`).
+    runs: Vec<LastRun>,
+}
+
+/// An assistant turn that ran: the steps it made in its app, and the drawing it left.
+struct LastRun {
+    turn: usize,
+    target: assistant::Target,
+    steps: usize,
+    after: host::Doc,
 }
 
 /// The open app's commands, as the assistant's server is told them: id, label and parameters.
-fn catalog(target: assistant::Target) -> serde_json::Value {
+pub(crate) fn catalog(target: assistant::Target) -> serde_json::Value {
     match target {
         assistant::Target::Cad => serde_json::Value::Array(
             aptcad_engine::command_specs()
@@ -210,31 +222,63 @@ impl Studio {
         }
     }
 
-    /// The open drawing or model in brief, for the assistant: AptCAD's `drawing.inspect`, AptBIM's `inspect`.
-    fn state(&mut self, target: assistant::Target) -> serde_json::Value {
-        let state = match target {
-            assistant::Target::Cad => self
-                .cad
-                .run("drawing.inspect", serde_json::json!({"entities": false})),
-            assistant::Target::Bim => self.bim.run_command("inspect", serde_json::json!({})),
-        };
-        state.unwrap_or(serde_json::Value::Null)
+    fn host(&mut self, target: assistant::Target) -> &mut dyn host::Host {
+        match target {
+            assistant::Target::Cad => &mut self.cad,
+            assistant::Target::Bim => &mut self.bim,
+        }
     }
 
     /// Runs the commands of one of the assistant's turns in the app they were made for, as its menus would,
-    /// and gives the assistant how each went.
-    fn run_turn(&mut self, turn: usize) {
+    /// and gives the assistant how each went; when one failed and fixes come by themselves, asks for one.
+    fn run_turn(&mut self, ctx: &egui::Context, turn: usize) {
         let Some((target, commands)) = self.assistant.commands_of(turn) else {
             return;
         };
-        let outcomes = commands
-            .into_iter()
-            .map(|(id, params)| match target {
-                assistant::Target::Cad => self.cad.run(&id, params),
-                assistant::Target::Bim => self.bim.run_command(&id, params),
-            })
-            .collect();
-        self.assistant.record(turn, outcomes);
+        let ran = host::run_all(self.host(target), &commands);
+        match ran.steps {
+            Some(0) => {}
+            Some(steps) => self.runs.push(LastRun {
+                turn,
+                target,
+                steps,
+                after: ran.after,
+            }),
+            // Steps it can't count: nothing before it can be taken back cleanly either.
+            None => self.runs.clear(),
+        }
+        if self.assistant.record(turn, ran.outcomes) {
+            self.fix(ctx, target);
+        }
+    }
+
+    fn fix(&mut self, ctx: &egui::Context, target: assistant::Target) {
+        let state = self.host(target).state();
+        self.assistant.fix(ctx, target, catalog(target), state);
+    }
+
+    /// The turn Undo all can take back now: the newest that ran, while its app's drawing is the one it left. Once
+    /// it is taken back, the drawing is the one the turn before it left, so that one is offered next. A change made
+    /// since (by the user, or by the other turns' undo) ends them all.
+    fn undoable(&mut self) -> Option<usize> {
+        let (turn, target) = self.runs.last().map(|r| (r.turn, r.target))?;
+        let now = self.host(target).doc();
+        let still = self.runs.last().is_some_and(|r| r.after.same(&now));
+        if !still {
+            self.runs.clear();
+        }
+        still.then_some(turn)
+    }
+
+    fn undo_turn(&mut self, turn: usize) {
+        if self.runs.last().is_none_or(|r| r.turn != turn) {
+            return;
+        }
+        let Some(run) = self.runs.pop() else {
+            return;
+        };
+        let result = self.host(run.target).undo(run.steps).map(|()| run.steps);
+        self.assistant.undone(turn, result);
     }
 
     /// The assistant's strip on the right, kept free before the app is drawn (see `reserve_bar`).
@@ -250,6 +294,7 @@ impl Studio {
     /// The assistant panel, drawn after the app on a layer above it, in the strip `reserve_side` kept.
     fn assistant_panel(&mut self, ctx: &egui::Context, side: egui::Rect) {
         let target = self.target();
+        let undoable = self.undoable();
         let mut action = None;
         egui::Area::new(egui::Id::unique("studio-assistant-area"))
             .order(egui::Order::Middle)
@@ -266,16 +311,21 @@ impl Studio {
                 );
                 egui::Frame::new().inner_margin(10.0).show(ui, |ui| {
                     ui.set_max_size(side.size() - vec2(20.0, 20.0));
-                    action = self.assistant.ui(ui, target);
+                    action = self.assistant.ui(ui, target, undoable);
                 });
             });
         match action {
             Some(assistant::Action::Ask(text)) => {
-                let state = self.state(target);
+                let state = self.host(target).state();
                 self.assistant
                     .ask(ctx, target, text, catalog(target), state);
             }
-            Some(assistant::Action::Run(turn)) => self.run_turn(turn),
+            Some(assistant::Action::Run(turn)) => self.run_turn(ctx, turn),
+            Some(assistant::Action::Undo(turn)) => self.undo_turn(turn),
+            Some(assistant::Action::Fix(turn)) => {
+                let target = self.assistant.target_of(turn).unwrap_or(target);
+                self.fix(ctx, target);
+            }
             None => {}
         }
     }
@@ -369,7 +419,8 @@ impl eframe::App for Studio {
         let strip = Self::reserve_bar(ui);
         let side = self.assistant.open.then(|| Self::reserve_side(ui));
         if let Some(turn) = self.assistant.poll() {
-            self.run_turn(turn);
+            let ctx = ui.ctx().clone();
+            self.run_turn(&ctx, turn);
         }
         match self.mode {
             Mode::Cad => self.cad.guarded_ui(ui),
@@ -574,6 +625,9 @@ fn main() -> std::process::ExitCode {
         println!("{USAGE}");
         return std::process::ExitCode::SUCCESS;
     }
+    if args.first().is_some_and(|a| a == "eval") {
+        return eval::main(&args[1..]);
+    }
     if args.iter().any(|a| a == "-V" || a == "--version") {
         println!("aptimizer-studio {}", env!("CARGO_PKG_VERSION"));
         return std::process::ExitCode::SUCCESS;
@@ -689,6 +743,7 @@ fn main() -> std::process::ExitCode {
                 icons: None,
                 title: String::new(),
                 assistant,
+                runs: Vec::new(),
             };
             // Whichever app starts applies its look on its first frame anyway; asked again for certainty.
             match start_mode {
@@ -770,5 +825,61 @@ mod tests {
     fn unknown_files_and_options_are_refused() {
         assert!(parse_args(["notes.txt".to_string()]).is_err());
         assert!(parse_args(["--fast".to_string()]).is_err());
+    }
+
+    #[test]
+    fn undo_all_takes_back_turns_newest_first_until_the_drawing_changes() {
+        let mut cad = CadApp::new(
+            aptcad_engine::Session::new(),
+            aptcad_ui_egui::Services::default(),
+        );
+        if cad.session.docs.is_empty() {
+            cad.session.new_drawing(true);
+        }
+        let mut studio = Studio {
+            mode: Mode::Cad,
+            cad,
+            bim: BimApp::new(aptbim_core::engine::Session::new()),
+            icons: None,
+            title: String::new(),
+            assistant: assistant::Assistant::new("https://s".into(), "apts_x".into()),
+            runs: Vec::new(),
+        };
+        let ctx = egui::Context::default();
+        let circles = |s: &mut Studio| {
+            host::Host::state(&mut s.cad)["counts"]["Circle"]
+                .as_u64()
+                .unwrap_or(0)
+        };
+        let ask = |s: &mut Studio, x: i32| {
+            let _body = s.assistant.request(
+                assistant::Target::Cad,
+                Some("a circle".into()),
+                serde_json::json!([]),
+                serde_json::json!({}),
+            );
+            s.assistant.answer(
+                assistant::Target::Cad,
+                Ok(serde_json::json!({"reply": "", "commands": [{"id": "circle", "params": {"center": [x, 0], "radius": 1}}]})),
+            );
+            let index = s.assistant.turns_len() - 1;
+            s.run_turn(&ctx, index);
+            index
+        };
+        let first = ask(&mut studio, 0);
+        let second = ask(&mut studio, 10);
+        assert_eq!(circles(&mut studio), 2);
+        assert_eq!(studio.undoable(), Some(second));
+        studio.undo_turn(second);
+        assert_eq!(circles(&mut studio), 1);
+        assert_eq!(studio.undoable(), Some(first), "then the turn before it");
+        let third = ask(&mut studio, 20);
+        assert_eq!(studio.undoable(), Some(third));
+        let _ = studio.cad.run(
+            "circle",
+            serde_json::json!({"center": [30, 0], "radius": 1}),
+        );
+        assert_eq!(studio.undoable(), None, "the user's own change ends them");
+        assert_eq!(circles(&mut studio), 3);
     }
 }

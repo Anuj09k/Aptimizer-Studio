@@ -1,0 +1,187 @@
+{
+  "about": "The assistant's test set: requests per mode, what each should do, and a reference answer that does it. Run with `aptimizer-studio eval` (see docs/assistant-test-set.md). Checks read the state Studio sends (AptCAD's drawing.inspect, AptBIM's inspect in brief) or, with `in`, a query's answer, before the request and after. `$state:PATH` in a reference answer is the before-state's value there.",
+  "cases": [
+    {
+      "name": "cad-line",
+      "mode": "cad",
+      "request": "Draw a line from 0,0 to 100,50.",
+      "checks": [{"grows": "counts.Line", "by": 1}],
+      "reference": [{"id": "line", "params": {"points": [[0, 0], [100, 50]]}}]
+    },
+    {
+      "name": "cad-rectangle",
+      "mode": "cad",
+      "request": "Draw a 4000 x 3000 rectangle with its lower-left corner at the origin.",
+      "checks": [
+        {"any_of": [{"grows": "counts.Polyline", "by": 1}, {"grows": "counts.Line", "by": 4}]},
+        {"near": "extents.0.0", "value": 0, "tol": 1},
+        {"near": "extents.0.1", "value": 0, "tol": 1},
+        {"near": "extents.1.0", "value": 4000, "tol": 1},
+        {"near": "extents.1.1", "value": 3000, "tol": 1}
+      ],
+      "reference": [{"id": "rectang", "params": {"p1": [0, 0], "p2": [4000, 3000]}}]
+    },
+    {
+      "name": "cad-circle-on-layer",
+      "mode": "cad",
+      "request": "Make a layer called WALLS in red, make it the current layer, and draw a circle of radius 500 centred at 1000,1000.",
+      "checks": [
+        {"has": "layers.*.name", "value": "WALLS"},
+        {"equals": "currentLayer", "value": "WALLS"},
+        {"grows": "counts.Circle", "by": 1}
+      ],
+      "reference": [
+        {"id": "layer.new", "params": {"name": "WALLS", "color": "red", "current": true}},
+        {"id": "circle", "params": {"center": [1000, 1000], "radius": 500}}
+      ]
+    },
+    {
+      "name": "cad-title-text",
+      "mode": "cad",
+      "request": "Write GROUND FLOOR PLAN at 0,-500, 250 units high.",
+      "checks": [{"any_of": [{"grows": "counts.Text", "by": 1}, {"grows": "counts.MText", "by": 1}]}],
+      "reference": [{"id": "text", "params": {"at": [0, -500], "text": "GROUND FLOOR PLAN", "height": 250}}]
+    },
+    {
+      "name": "cad-row-of-circles",
+      "mode": "cad",
+      "request": "Draw a row of 5 circles of radius 100, 1000 apart along x, the first centred at 0,0.",
+      "checks": [
+        {"grows": "counts.Circle", "by": 5},
+        {"near": "extents.1.0", "value": 4100, "tol": 1, "why": "the last circle's right edge"}
+      ],
+      "reference": [
+        {"id": "circle", "params": {"center": [0, 0], "radius": 100}},
+        {"id": "circle", "params": {"center": [1000, 0], "radius": 100}},
+        {"id": "circle", "params": {"center": [2000, 0], "radius": 100}},
+        {"id": "circle", "params": {"center": [3000, 0], "radius": 100}},
+        {"id": "circle", "params": {"center": [4000, 0], "radius": 100}}
+      ]
+    },
+    {
+      "name": "cad-erase-circles",
+      "mode": "cad",
+      "setup": [
+        {"id": "circle", "params": {"center": [0, 0], "radius": 100}},
+        {"id": "circle", "params": {"center": [500, 0], "radius": 100}},
+        {"id": "circle", "params": {"center": [1000, 0], "radius": 100}},
+        {"id": "line", "params": {"points": [[0, -500], [1000, -500]]}}
+      ],
+      "request": "Erase all the circles.",
+      "checks": [
+        {"equals": "counts.Circle", "value": 0},
+        {"equals": "counts.Line", "value": 1, "why": "the line stays"}
+      ],
+      "reference": [
+        {"id": "qselect", "params": {"type": "Circle"}},
+        {"id": "erase", "params": {}}
+      ]
+    },
+    {
+      "name": "cad-move-circle",
+      "mode": "cad",
+      "setup": [
+        {"id": "circle", "params": {"center": [0, 0], "radius": 100}},
+        {"id": "line", "params": {"points": [[0, -500], [100, -500]]}}
+      ],
+      "request": "Move the circle 2000 to the right.",
+      "checks": [
+        {"near": "extents.1.0", "value": 2100, "tol": 1, "why": "the circle's right edge"},
+        {"equals": "counts.Circle", "value": 1}
+      ],
+      "reference": [
+        {"id": "qselect", "params": {"type": "Circle"}},
+        {"id": "move", "params": {"delta": [2000, 0]}}
+      ]
+    },
+    {
+      "name": "cad-dimension",
+      "mode": "cad",
+      "setup": [{"id": "line", "params": {"points": [[0, 0], [5000, 0]]}}],
+      "request": "Dimension the length of the line, 500 below it.",
+      "checks": [{"grows": "counts.Dimension", "by": 1}],
+      "reference": [{"id": "dimlinear", "params": {"p1": [0, 0], "p2": [5000, 0], "at": [2500, -500]}}]
+    },
+    {
+      "name": "cad-question",
+      "mode": "cad",
+      "request": "What layers are in this drawing?",
+      "checks": [{"no_commands": true}]
+    },
+    {
+      "name": "bim-room-walls",
+      "mode": "bim",
+      "request": "Draw the walls of a 4 x 3 m room, its south-west corner at the origin.",
+      "checks": [
+        {"grows": "counts.wall", "by": 4}
+      ],
+      "reference": [{"id": "wall", "params": {"points": [[0, 0], [4000, 0], [4000, 3000], [0, 3000]], "closed": true}}]
+    },
+    {
+      "name": "bim-level",
+      "mode": "bim",
+      "request": "Add a level called Terrace at 9000 mm.",
+      "checks": [{"has": "levels.*.name", "value": "Terrace"}, {"has": "levels.*.elevation", "value": 9000}],
+      "reference": [{"id": "level", "params": {"elevation": 9000, "name": "Terrace"}}]
+    },
+    {
+      "name": "bim-door",
+      "mode": "bim",
+      "setup": [{"id": "wall", "params": {"points": [[0, 0], [5000, 0]]}}],
+      "request": "Put a door in the middle of the wall.",
+      "checks": [{"grows": "counts.door", "by": 1}],
+      "reference": [{"id": "door", "params": {"at": [2500, 0]}}]
+    },
+    {
+      "name": "bim-windows",
+      "mode": "bim",
+      "setup": [{"id": "wall", "params": {"points": [[0, 0], [6000, 0]]}}],
+      "request": "Add two windows to the wall, centred 1500 mm from each end.",
+      "checks": [{"grows": "counts.window", "by": 2}],
+      "reference": [
+        {"id": "window", "params": {"at": [1500, 0]}},
+        {"id": "window", "params": {"at": [4500, 0]}}
+      ]
+    },
+    {
+      "name": "bim-named-room",
+      "mode": "bim",
+      "setup": [{"id": "wall", "params": {"points": [[0, 0], [4000, 0], [4000, 3000], [0, 3000]], "closed": true}}],
+      "request": "Make a room called Study inside these walls.",
+      "checks": [
+        {"grows": "counts.room", "by": 1},
+        {"has": "elements.*.name", "value": "Study", "in": {"id": "elements", "params": {"category": "room"}}}
+      ],
+      "reference": [{"id": "room", "params": {"point": [2000, 1500], "name": "Study"}}]
+    },
+    {
+      "name": "bim-floor",
+      "mode": "bim",
+      "setup": [{"id": "wall", "params": {"points": [[0, 0], [4000, 0], [4000, 3000], [0, 3000]], "closed": true}}],
+      "request": "Add a floor inside these walls.",
+      "checks": [{"grows": "counts.floor", "by": 1}],
+      "reference": [{"id": "floor", "params": {"boundary": [[0, 0], [4000, 0], [4000, 3000], [0, 3000]]}}]
+    },
+    {
+      "name": "bim-delete-walls",
+      "mode": "bim",
+      "setup": [
+        {"id": "wall", "params": {"points": [[0, 0], [4000, 0]]}},
+        {"id": "wall", "params": {"points": [[0, 5000], [4000, 5000]]}},
+        {"id": "level", "params": {"elevation": 6000, "name": "Roof"}}
+      ],
+      "request": "Delete all the walls.",
+      "checks": [
+        {"equals": "counts.wall", "value": 0},
+        {"has": "levels.*.name", "value": "Roof", "why": "the level stays"}
+      ],
+      "reference": [{"id": "delete", "params": {"ids": "$state:ids.wall"}}]
+    },
+    {
+      "name": "bim-question",
+      "mode": "bim",
+      "request": "How many levels does this project have?",
+      "checks": [{"no_commands": true}]
+    }
+  ]
+}

@@ -46,6 +46,15 @@ room with 230 mm walls", "tag every door"); the assistant answers with a short r
 own commands, which you run with **Run these** (or tick **Run as they come**). Each command goes through the same
 command path as the app's menus, so it is checked by the app and can be undone; the model never edits a drawing.
 
+When a command fails, the ones after it are skipped (they were planned on it), and the turn shows **Fix it**: the
+failures, with the app's reasons and what each command was given, go back to the assistant, which answers with the
+commands that finish the request from the drawing as it is now. With **Run as they come** ticked, Studio asks for
+the fix by itself, at most twice in a row. **Undo all** takes back every change a turn made, newest turn first; it
+is offered only while the drawing is still the one that turn left, so it never takes back your own later edits.
+
+How well the assistant does is measured by its test set, `aptimizer-studio eval`: see
+[docs/assistant-test-set.md](docs/assistant-test-set.md).
+
 Studio holds no AI key. It connects to your Aptimizer account: in Aptimizer, open Profile > Aptimizer Studio >
 Make a key, then paste the key and your Aptimizer server's address into the panel's Connection settings (or set
 `APTIMIZER_URL`). The server calls the model and counts each request against your account's AI allowance;
