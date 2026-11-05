@@ -13,6 +13,8 @@
     windows_subsystem = "windows"
 )]
 
+mod assistant;
+
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
@@ -25,6 +27,11 @@ const APP_ID: &str = "io.github.anuj09k.aptimizer-studio";
 
 /// The height of the bar with the two modes, above both apps.
 const BAR_HEIGHT: f32 = 30.0;
+/// The assistant panel's width, on the right of either mode.
+const ASSISTANT_WIDTH: f32 = 360.0;
+/// Where the assistant's server address and access key are kept between runs.
+const ASSISTANT_SERVER_KEY: &str = "studio.assistant.server";
+const ASSISTANT_ACCESS_KEY: &str = "studio.assistant.key";
 
 const USAGE: &str = "USAGE: aptimizer-studio [--cad | --bim] [FILE...]
   FILE   a drawing (.dxf, .dwg, .dwt, .svg) opens in AptCAD; a project (.aptbim, .ifc, .rvt) in AptBIM
@@ -91,6 +98,22 @@ struct Studio {
     icons: Option<[TextureHandle; 2]>,
     /// The window title last sent, so it is sent again only when it changes.
     title: String,
+    /// The AI assistant panel (see `assistant`).
+    assistant: assistant::Assistant,
+}
+
+/// The open app's commands, as the assistant's server is told them: id, label and parameters.
+fn catalog(target: assistant::Target) -> serde_json::Value {
+    match target {
+        assistant::Target::Cad => serde_json::Value::Array(
+            aptcad_engine::command_specs()
+                .iter()
+                .filter(|c| !c.id.starts_with("ui."))
+                .map(|c| serde_json::json!({"id": c.id, "label": c.label, "params": c.params}))
+                .collect(),
+        ),
+        assistant::Target::Bim => aptbim_core::engine::catalog(),
+    }
 }
 
 /// One keymap for both modes: the one the mode shown has (where Options or Settings changed it) becomes the other's.
@@ -180,6 +203,83 @@ impl Studio {
     }
 
     /// Keep the strip at the top of the window for the bar, before an app lays itself out below it.
+    fn target(&self) -> assistant::Target {
+        match self.mode {
+            Mode::Cad => assistant::Target::Cad,
+            Mode::Bim => assistant::Target::Bim,
+        }
+    }
+
+    /// The open drawing or model in brief, for the assistant: AptCAD's `drawing.inspect`, AptBIM's `inspect`.
+    fn state(&mut self, target: assistant::Target) -> serde_json::Value {
+        let state = match target {
+            assistant::Target::Cad => self
+                .cad
+                .run("drawing.inspect", serde_json::json!({"entities": false})),
+            assistant::Target::Bim => self.bim.run_command("inspect", serde_json::json!({})),
+        };
+        state.unwrap_or(serde_json::Value::Null)
+    }
+
+    /// Runs the commands of one of the assistant's turns in the app they were made for, as its menus would,
+    /// and gives the assistant how each went.
+    fn run_turn(&mut self, turn: usize) {
+        let Some((target, commands)) = self.assistant.commands_of(turn) else {
+            return;
+        };
+        let outcomes = commands
+            .into_iter()
+            .map(|(id, params)| match target {
+                assistant::Target::Cad => self.cad.run(&id, params),
+                assistant::Target::Bim => self.bim.run_command(&id, params),
+            })
+            .collect();
+        self.assistant.record(turn, outcomes);
+    }
+
+    /// The assistant's strip on the right, kept free before the app is drawn (see `reserve_bar`).
+    fn reserve_side(ui: &mut egui::Ui) -> egui::Rect {
+        egui::Panel::right("studio-assistant")
+            .exact_size(ASSISTANT_WIDTH)
+            .resizable(false)
+            .show(ui, |_| {})
+            .response
+            .rect
+    }
+
+    /// The assistant panel, drawn after the app on a layer above it, in the strip `reserve_side` kept.
+    fn assistant_panel(&mut self, ctx: &egui::Context, side: egui::Rect) {
+        let target = self.target();
+        let mut action = None;
+        egui::Area::new(egui::Id::unique("studio-assistant-area"))
+            .order(egui::Order::Middle)
+            .fixed_pos(side.min)
+            .show(ctx, |ui| {
+                ui.set_min_size(side.size());
+                ui.set_max_size(side.size());
+                let visuals = ui.visuals().clone();
+                ui.painter().rect_filled(side, 0.0, visuals.panel_fill);
+                ui.painter().vline(
+                    side.left() + 0.5,
+                    side.y_range(),
+                    visuals.widgets.noninteractive.bg_stroke,
+                );
+                egui::Frame::new().inner_margin(10.0).show(ui, |ui| {
+                    ui.set_max_size(side.size() - vec2(20.0, 20.0));
+                    action = self.assistant.ui(ui, target);
+                });
+            });
+        match action {
+            Some(assistant::Action::Ask(text)) => {
+                let state = self.state(target);
+                self.assistant
+                    .ask(ctx, target, text, catalog(target), state);
+            }
+            Some(assistant::Action::Run(turn)) => self.run_turn(turn),
+            None => {}
+        }
+    }
+
     fn reserve_bar(ui: &mut egui::Ui) -> egui::Rect {
         egui::Panel::top("studio-mode-bar")
             .exact_size(BAR_HEIGHT)
@@ -218,6 +318,11 @@ impl Studio {
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                     ui.add_space(8.0);
                     ui.label(RichText::new("by Aptimizer").small().color(Color32::GRAY));
+                    ui.add_space(8.0);
+                    let toggle = egui::Button::selectable(self.assistant.open, RichText::new("Assistant").strong());
+                    if ui.add(toggle).on_hover_text("The AI assistant: describe a change, run the commands it proposes").clicked() {
+                        self.assistant.open = !self.assistant.open;
+                    }
                 });
             });
         });
@@ -262,12 +367,19 @@ impl eframe::App for Studio {
 
     fn ui(&mut self, ui: &mut egui::Ui, frame: &mut eframe::Frame) {
         let strip = Self::reserve_bar(ui);
+        let side = self.assistant.open.then(|| Self::reserve_side(ui));
+        if let Some(turn) = self.assistant.poll() {
+            self.run_turn(turn);
+        }
         match self.mode {
             Mode::Cad => self.cad.guarded_ui(ui),
             Mode::Bim => eframe::App::ui(&mut self.bim, ui, frame),
         }
         share_keymap(self.mode, &mut self.cad, &mut self.bim);
         let ctx = ui.ctx().clone();
+        if let Some(side) = side {
+            self.assistant_panel(&ctx, side);
+        }
         self.mode_bar(&ctx, strip);
         self.keep_title(&ctx);
     }
@@ -288,6 +400,8 @@ impl eframe::App for Studio {
             aptcad_ui_egui::autosave::PREFS_KEY,
             aptcad_ui_egui::autosave::prefs_json(),
         );
+        storage.set_string(ASSISTANT_SERVER_KEY, self.assistant.server.clone());
+        storage.set_string(ASSISTANT_ACCESS_KEY, self.assistant.key.clone());
     }
 
     fn persist_egui_memory(&self) -> bool {
@@ -554,12 +668,27 @@ fn main() -> std::process::ExitCode {
                 cad.set_wgpu(state, None);
                 bim.use_graphics_card(state);
             }
+            // The assistant's server: the one it was last connected to, else APTIMIZER_URL.
+            let stored = |key: &str| {
+                cc.storage
+                    .and_then(|s| s.get_string(key))
+                    .unwrap_or_default()
+            };
+            let server = Some(stored(ASSISTANT_SERVER_KEY))
+                .filter(|s| !s.trim().is_empty())
+                .or_else(|| std::env::var("APTIMIZER_URL").ok())
+                .unwrap_or_default();
+            let mut assistant = assistant::Assistant::new(server, stored(ASSISTANT_ACCESS_KEY));
+            if !assistant.server.trim().is_empty() && assistant.key.trim().starts_with("apts_") {
+                assistant.connect(&cc.egui_ctx);
+            }
             let mut studio = Studio {
                 mode: start_mode,
                 cad,
                 bim,
                 icons: None,
                 title: String::new(),
+                assistant,
             };
             // Whichever app starts applies its look on its first frame anyway; asked again for certainty.
             match start_mode {

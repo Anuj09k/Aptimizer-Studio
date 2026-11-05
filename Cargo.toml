@@ -19,14 +19,16 @@ rvt = ["dep:aptbim-rvt"]
 aptcad-engine = { git = "https://github.com/Anuj09k/AptCAD", rev = "cf578d233afa4e9aa6582405b975e576e8c90dd2" }
 aptcad-io = { git = "https://github.com/Anuj09k/AptCAD", rev = "cf578d233afa4e9aa6582405b975e576e8c90dd2" }
 aptcad-ui-egui = { git = "https://github.com/Anuj09k/AptCAD", rev = "cf578d233afa4e9aa6582405b975e576e8c90dd2" }
-aptbim-core = { git = "https://github.com/Anuj09k/AptBIM-", rev = "f56abea270ba4f35610e9b1ccf0dc60fd781a0d2" }
-aptbim-ui-egui = { git = "https://github.com/Anuj09k/AptBIM-", rev = "f56abea270ba4f35610e9b1ccf0dc60fd781a0d2" }
-aptbim-dwg = { git = "https://github.com/Anuj09k/AptBIM-", rev = "f56abea270ba4f35610e9b1ccf0dc60fd781a0d2" }
-aptbim-rvt = { git = "https://github.com/Anuj09k/AptBIM-", rev = "f56abea270ba4f35610e9b1ccf0dc60fd781a0d2", optional = true }
+aptbim-core = { git = "https://github.com/Anuj09k/AptBIM-", rev = "129d15b2972b61debb2cd15c4a0030b16cfa7db8" }
+aptbim-ui-egui = { git = "https://github.com/Anuj09k/AptBIM-", rev = "129d15b2972b61debb2cd15c4a0030b16cfa7db8" }
+aptbim-dwg = { git = "https://github.com/Anuj09k/AptBIM-", rev = "129d15b2972b61debb2cd15c4a0030b16cfa7db8" }
+aptbim-rvt = { git = "https://github.com/Anuj09k/AptBIM-", rev = "129d15b2972b61debb2cd15c4a0030b16cfa7db8", optional = true }
 egui = { version = "0.37", default-features = false, features = ["default_fonts", "monochrome_emoji_fonts"] }
 eframe = { version = "0.37", default-features = false, features = ["clipboard", "wgpu", "accesskit", "wayland", "x11", "links", "persistence"] }
 rfd = "0.17"
 serde_json = "1"
+# The assistant's calls to Aptimizer's server; the version and TLS AptBIM's updater already uses.
+ureq = { version = "3", default-features = false, features = ["rustls"] }
 sys-locale = "0.3"
 
 [lints.rust]

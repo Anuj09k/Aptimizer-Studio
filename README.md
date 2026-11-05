@@ -39,6 +39,18 @@ sudo apt-get install -y libxkbcommon-dev libwayland-dev libfontconfig1-dev libgt
 (`.aptbim`, `.ifc`, `.rvt`) in AptBIM; the window starts in the mode of the last file given, or the one `--cad` / `--bim`
 asks for, or AptBIM.
 
+## The AI assistant
+
+The **Assistant** button on the mode bar opens a panel beside either mode. Describe a change ("draw a 4 x 3 m
+room with 230 mm walls", "tag every door"); the assistant answers with a short reply and a list of the open app's
+own commands, which you run with **Run these** (or tick **Run as they come**). Each command goes through the same
+command path as the app's menus, so it is checked by the app and can be undone; the model never edits a drawing.
+
+Studio holds no AI key. It connects to your Aptimizer account: in Aptimizer, open Profile > Aptimizer Studio >
+Make a key, then paste the key and your Aptimizer server's address into the panel's Connection settings (or set
+`APTIMIZER_URL`). The server calls the model and counts each request against your account's AI allowance;
+revoke the key there if a computer is lost. Studio keeps the address and key with its other settings.
+
 ## How it fits together
 
 Both apps are libraries with a thin window around them: AptCAD's `CadApp` and AptBIM's `BimApp`. This program
