@@ -1,0 +1,4 @@
+# AptBIM's repository is private: fetch git dependencies with the git command line, which uses the
+# credentials your git already has (a credential helper, or a token), not cargo's built-in client.
+[net]
+git-fetch-with-cli = true
