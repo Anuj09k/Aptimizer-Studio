@@ -16,9 +16,9 @@ rvt = ["dep:aptbim-rvt"]
 
 [dependencies]
 # Both apps at pinned commits: bump a rev to take a newer AptCAD or AptBIM.
-aptcad-engine = { git = "https://github.com/Anuj09k/AptCAD", rev = "cf578d233afa4e9aa6582405b975e576e8c90dd2" }
-aptcad-io = { git = "https://github.com/Anuj09k/AptCAD", rev = "cf578d233afa4e9aa6582405b975e576e8c90dd2" }
-aptcad-ui-egui = { git = "https://github.com/Anuj09k/AptCAD", rev = "cf578d233afa4e9aa6582405b975e576e8c90dd2" }
+aptcad-engine = { git = "https://github.com/Anuj09k/AptCAD", rev = "d881fc37eaf686fd123e31a3460fca3067b81f8e" }
+aptcad-io = { git = "https://github.com/Anuj09k/AptCAD", rev = "d881fc37eaf686fd123e31a3460fca3067b81f8e" }
+aptcad-ui-egui = { git = "https://github.com/Anuj09k/AptCAD", rev = "d881fc37eaf686fd123e31a3460fca3067b81f8e" }
 aptbim-core = { git = "https://github.com/Anuj09k/AptBIM-", rev = "2b2db2d1c689dff184298eeb6d9883c39ebda1c3" }
 aptbim-ui-egui = { git = "https://github.com/Anuj09k/AptBIM-", rev = "2b2db2d1c689dff184298eeb6d9883c39ebda1c3" }
 aptbim-dwg = { git = "https://github.com/Anuj09k/AptBIM-", rev = "2b2db2d1c689dff184298eeb6d9883c39ebda1c3" }

@@ -5,183 +5,1671 @@
       "name": "cad-line",
       "mode": "cad",
       "request": "Draw a line from 0,0 to 100,50.",
-      "checks": [{"grows": "counts.Line", "by": 1}],
-      "reference": [{"id": "line", "params": {"points": [[0, 0], [100, 50]]}}]
+      "checks": [
+        {
+          "grows": "counts.Line",
+          "by": 1
+        }
+      ],
+      "reference": [
+        {
+          "id": "line",
+          "params": {
+            "points": [
+              [
+                0,
+                0
+              ],
+              [
+                100,
+                50
+              ]
+            ]
+          }
+        }
+      ]
     },
     {
       "name": "cad-rectangle",
       "mode": "cad",
       "request": "Draw a 4000 x 3000 rectangle with its lower-left corner at the origin.",
       "checks": [
-        {"any_of": [{"grows": "counts.Polyline", "by": 1}, {"grows": "counts.Line", "by": 4}]},
-        {"near": "extents.0.0", "value": 0, "tol": 1},
-        {"near": "extents.0.1", "value": 0, "tol": 1},
-        {"near": "extents.1.0", "value": 4000, "tol": 1},
-        {"near": "extents.1.1", "value": 3000, "tol": 1}
+        {
+          "any_of": [
+            {
+              "grows": "counts.Polyline",
+              "by": 1
+            },
+            {
+              "grows": "counts.Line",
+              "by": 4
+            }
+          ]
+        },
+        {
+          "near": "extents.0.0",
+          "value": 0,
+          "tol": 1
+        },
+        {
+          "near": "extents.0.1",
+          "value": 0,
+          "tol": 1
+        },
+        {
+          "near": "extents.1.0",
+          "value": 4000,
+          "tol": 1
+        },
+        {
+          "near": "extents.1.1",
+          "value": 3000,
+          "tol": 1
+        }
       ],
-      "reference": [{"id": "rectang", "params": {"p1": [0, 0], "p2": [4000, 3000]}}]
+      "reference": [
+        {
+          "id": "rectang",
+          "params": {
+            "p1": [
+              0,
+              0
+            ],
+            "p2": [
+              4000,
+              3000
+            ]
+          }
+        }
+      ]
     },
     {
       "name": "cad-circle-on-layer",
       "mode": "cad",
       "request": "Make a layer called WALLS in red, make it the current layer, and draw a circle of radius 500 centred at 1000,1000.",
       "checks": [
-        {"has": "layers.*.name", "value": "WALLS"},
-        {"equals": "currentLayer", "value": "WALLS"},
-        {"grows": "counts.Circle", "by": 1}
+        {
+          "has": "layers.*.name",
+          "value": "WALLS"
+        },
+        {
+          "equals": "currentLayer",
+          "value": "WALLS"
+        },
+        {
+          "grows": "counts.Circle",
+          "by": 1
+        }
       ],
       "reference": [
-        {"id": "layer.new", "params": {"name": "WALLS", "color": "red", "current": true}},
-        {"id": "circle", "params": {"center": [1000, 1000], "radius": 500}}
+        {
+          "id": "layer.new",
+          "params": {
+            "name": "WALLS",
+            "color": "red",
+            "current": true
+          }
+        },
+        {
+          "id": "circle",
+          "params": {
+            "center": [
+              1000,
+              1000
+            ],
+            "radius": 500
+          }
+        }
       ]
     },
     {
       "name": "cad-title-text",
       "mode": "cad",
       "request": "Write GROUND FLOOR PLAN at 0,-500, 250 units high.",
-      "checks": [{"any_of": [{"grows": "counts.Text", "by": 1}, {"grows": "counts.MText", "by": 1}]}],
-      "reference": [{"id": "text", "params": {"at": [0, -500], "text": "GROUND FLOOR PLAN", "height": 250}}]
+      "checks": [
+        {
+          "any_of": [
+            {
+              "grows": "counts.Text",
+              "by": 1
+            },
+            {
+              "grows": "counts.MText",
+              "by": 1
+            }
+          ]
+        }
+      ],
+      "reference": [
+        {
+          "id": "text",
+          "params": {
+            "at": [
+              0,
+              -500
+            ],
+            "text": "GROUND FLOOR PLAN",
+            "height": 250
+          }
+        }
+      ]
     },
     {
       "name": "cad-row-of-circles",
       "mode": "cad",
       "request": "Draw a row of 5 circles of radius 100, 1000 apart along x, the first centred at 0,0.",
       "checks": [
-        {"grows": "counts.Circle", "by": 5},
-        {"near": "extents.1.0", "value": 4100, "tol": 1, "why": "the last circle's right edge"}
+        {
+          "grows": "counts.Circle",
+          "by": 5
+        },
+        {
+          "near": "extents.1.0",
+          "value": 4100,
+          "tol": 1,
+          "why": "the last circle's right edge"
+        }
       ],
       "reference": [
-        {"id": "circle", "params": {"center": [0, 0], "radius": 100}},
-        {"id": "circle", "params": {"center": [1000, 0], "radius": 100}},
-        {"id": "circle", "params": {"center": [2000, 0], "radius": 100}},
-        {"id": "circle", "params": {"center": [3000, 0], "radius": 100}},
-        {"id": "circle", "params": {"center": [4000, 0], "radius": 100}}
+        {
+          "id": "circle",
+          "params": {
+            "center": [
+              0,
+              0
+            ],
+            "radius": 100
+          }
+        },
+        {
+          "id": "circle",
+          "params": {
+            "center": [
+              1000,
+              0
+            ],
+            "radius": 100
+          }
+        },
+        {
+          "id": "circle",
+          "params": {
+            "center": [
+              2000,
+              0
+            ],
+            "radius": 100
+          }
+        },
+        {
+          "id": "circle",
+          "params": {
+            "center": [
+              3000,
+              0
+            ],
+            "radius": 100
+          }
+        },
+        {
+          "id": "circle",
+          "params": {
+            "center": [
+              4000,
+              0
+            ],
+            "radius": 100
+          }
+        }
       ]
     },
     {
       "name": "cad-erase-circles",
       "mode": "cad",
       "setup": [
-        {"id": "circle", "params": {"center": [0, 0], "radius": 100}},
-        {"id": "circle", "params": {"center": [500, 0], "radius": 100}},
-        {"id": "circle", "params": {"center": [1000, 0], "radius": 100}},
-        {"id": "line", "params": {"points": [[0, -500], [1000, -500]]}}
+        {
+          "id": "circle",
+          "params": {
+            "center": [
+              0,
+              0
+            ],
+            "radius": 100
+          }
+        },
+        {
+          "id": "circle",
+          "params": {
+            "center": [
+              500,
+              0
+            ],
+            "radius": 100
+          }
+        },
+        {
+          "id": "circle",
+          "params": {
+            "center": [
+              1000,
+              0
+            ],
+            "radius": 100
+          }
+        },
+        {
+          "id": "line",
+          "params": {
+            "points": [
+              [
+                0,
+                -500
+              ],
+              [
+                1000,
+                -500
+              ]
+            ]
+          }
+        }
       ],
       "request": "Erase all the circles.",
       "checks": [
-        {"equals": "counts.Circle", "value": 0},
-        {"equals": "counts.Line", "value": 1, "why": "the line stays"}
+        {
+          "equals": "counts.Circle",
+          "value": 0
+        },
+        {
+          "equals": "counts.Line",
+          "value": 1,
+          "why": "the line stays"
+        }
       ],
       "reference": [
-        {"id": "qselect", "params": {"type": "Circle"}},
-        {"id": "erase", "params": {}}
+        {
+          "id": "qselect",
+          "params": {
+            "type": "Circle"
+          }
+        },
+        {
+          "id": "erase",
+          "params": {}
+        }
       ]
     },
     {
       "name": "cad-move-circle",
       "mode": "cad",
       "setup": [
-        {"id": "circle", "params": {"center": [0, 0], "radius": 100}},
-        {"id": "line", "params": {"points": [[0, -500], [100, -500]]}}
+        {
+          "id": "circle",
+          "params": {
+            "center": [
+              0,
+              0
+            ],
+            "radius": 100
+          }
+        },
+        {
+          "id": "line",
+          "params": {
+            "points": [
+              [
+                0,
+                -500
+              ],
+              [
+                100,
+                -500
+              ]
+            ]
+          }
+        }
       ],
       "request": "Move the circle 2000 to the right.",
       "checks": [
-        {"near": "extents.1.0", "value": 2100, "tol": 1, "why": "the circle's right edge"},
-        {"equals": "counts.Circle", "value": 1}
+        {
+          "near": "extents.1.0",
+          "value": 2100,
+          "tol": 1,
+          "why": "the circle's right edge"
+        },
+        {
+          "equals": "counts.Circle",
+          "value": 1
+        }
       ],
       "reference": [
-        {"id": "qselect", "params": {"type": "Circle"}},
-        {"id": "move", "params": {"delta": [2000, 0]}}
+        {
+          "id": "qselect",
+          "params": {
+            "type": "Circle"
+          }
+        },
+        {
+          "id": "move",
+          "params": {
+            "delta": [
+              2000,
+              0
+            ]
+          }
+        }
       ]
     },
     {
       "name": "cad-dimension",
       "mode": "cad",
-      "setup": [{"id": "line", "params": {"points": [[0, 0], [5000, 0]]}}],
+      "setup": [
+        {
+          "id": "line",
+          "params": {
+            "points": [
+              [
+                0,
+                0
+              ],
+              [
+                5000,
+                0
+              ]
+            ]
+          }
+        }
+      ],
       "request": "Dimension the length of the line, 500 below it.",
-      "checks": [{"grows": "counts.Dimension", "by": 1}],
-      "reference": [{"id": "dimlinear", "params": {"p1": [0, 0], "p2": [5000, 0], "at": [2500, -500]}}]
+      "checks": [
+        {
+          "grows": "counts.Dimension",
+          "by": 1
+        }
+      ],
+      "reference": [
+        {
+          "id": "dimlinear",
+          "params": {
+            "p1": [
+              0,
+              0
+            ],
+            "p2": [
+              5000,
+              0
+            ],
+            "at": [
+              2500,
+              -500
+            ]
+          }
+        }
+      ]
     },
     {
       "name": "cad-question",
       "mode": "cad",
       "request": "What layers are in this drawing?",
-      "checks": [{"no_commands": true}]
+      "checks": [
+        {
+          "no_commands": true
+        }
+      ]
     },
     {
       "name": "bim-room-walls",
       "mode": "bim",
       "request": "Draw the walls of a 4 x 3 m room, its south-west corner at the origin.",
       "checks": [
-        {"grows": "counts.wall", "by": 4}
+        {
+          "grows": "counts.wall",
+          "by": 4
+        }
       ],
-      "reference": [{"id": "wall", "params": {"points": [[0, 0], [4000, 0], [4000, 3000], [0, 3000]], "closed": true}}]
+      "reference": [
+        {
+          "id": "wall",
+          "params": {
+            "points": [
+              [
+                0,
+                0
+              ],
+              [
+                4000,
+                0
+              ],
+              [
+                4000,
+                3000
+              ],
+              [
+                0,
+                3000
+              ]
+            ],
+            "closed": true
+          }
+        }
+      ]
     },
     {
       "name": "bim-level",
       "mode": "bim",
       "request": "Add a level called Terrace at 9000 mm.",
-      "checks": [{"has": "levels.*.name", "value": "Terrace"}, {"has": "levels.*.elevation", "value": 9000}],
-      "reference": [{"id": "level", "params": {"elevation": 9000, "name": "Terrace"}}]
+      "checks": [
+        {
+          "has": "levels.*.name",
+          "value": "Terrace"
+        },
+        {
+          "has": "levels.*.elevation",
+          "value": 9000
+        }
+      ],
+      "reference": [
+        {
+          "id": "level",
+          "params": {
+            "elevation": 9000,
+            "name": "Terrace"
+          }
+        }
+      ]
     },
     {
       "name": "bim-door",
       "mode": "bim",
-      "setup": [{"id": "wall", "params": {"points": [[0, 0], [5000, 0]]}}],
+      "setup": [
+        {
+          "id": "wall",
+          "params": {
+            "points": [
+              [
+                0,
+                0
+              ],
+              [
+                5000,
+                0
+              ]
+            ]
+          }
+        }
+      ],
       "request": "Put a door in the middle of the wall.",
-      "checks": [{"grows": "counts.door", "by": 1}],
-      "reference": [{"id": "door", "params": {"at": [2500, 0]}}]
+      "checks": [
+        {
+          "grows": "counts.door",
+          "by": 1
+        }
+      ],
+      "reference": [
+        {
+          "id": "door",
+          "params": {
+            "at": [
+              2500,
+              0
+            ]
+          }
+        }
+      ]
     },
     {
       "name": "bim-windows",
       "mode": "bim",
-      "setup": [{"id": "wall", "params": {"points": [[0, 0], [6000, 0]]}}],
+      "setup": [
+        {
+          "id": "wall",
+          "params": {
+            "points": [
+              [
+                0,
+                0
+              ],
+              [
+                6000,
+                0
+              ]
+            ]
+          }
+        }
+      ],
       "request": "Add two windows to the wall, centred 1500 mm from each end.",
-      "checks": [{"grows": "counts.window", "by": 2}],
+      "checks": [
+        {
+          "grows": "counts.window",
+          "by": 2
+        }
+      ],
       "reference": [
-        {"id": "window", "params": {"at": [1500, 0]}},
-        {"id": "window", "params": {"at": [4500, 0]}}
+        {
+          "id": "window",
+          "params": {
+            "at": [
+              1500,
+              0
+            ]
+          }
+        },
+        {
+          "id": "window",
+          "params": {
+            "at": [
+              4500,
+              0
+            ]
+          }
+        }
       ]
     },
     {
       "name": "bim-named-room",
       "mode": "bim",
-      "setup": [{"id": "wall", "params": {"points": [[0, 0], [4000, 0], [4000, 3000], [0, 3000]], "closed": true}}],
+      "setup": [
+        {
+          "id": "wall",
+          "params": {
+            "points": [
+              [
+                0,
+                0
+              ],
+              [
+                4000,
+                0
+              ],
+              [
+                4000,
+                3000
+              ],
+              [
+                0,
+                3000
+              ]
+            ],
+            "closed": true
+          }
+        }
+      ],
       "request": "Make a room called Study inside these walls.",
       "checks": [
-        {"grows": "counts.room", "by": 1},
-        {"has": "elements.*.name", "value": "Study", "in": {"id": "elements", "params": {"category": "room"}}}
+        {
+          "grows": "counts.room",
+          "by": 1
+        },
+        {
+          "has": "elements.*.name",
+          "value": "Study",
+          "in": {
+            "id": "elements",
+            "params": {
+              "category": "room"
+            }
+          }
+        }
       ],
-      "reference": [{"id": "room", "params": {"point": [2000, 1500], "name": "Study"}}]
+      "reference": [
+        {
+          "id": "room",
+          "params": {
+            "point": [
+              2000,
+              1500
+            ],
+            "name": "Study"
+          }
+        }
+      ]
     },
     {
       "name": "bim-floor",
       "mode": "bim",
-      "setup": [{"id": "wall", "params": {"points": [[0, 0], [4000, 0], [4000, 3000], [0, 3000]], "closed": true}}],
+      "setup": [
+        {
+          "id": "wall",
+          "params": {
+            "points": [
+              [
+                0,
+                0
+              ],
+              [
+                4000,
+                0
+              ],
+              [
+                4000,
+                3000
+              ],
+              [
+                0,
+                3000
+              ]
+            ],
+            "closed": true
+          }
+        }
+      ],
       "request": "Add a floor inside these walls.",
-      "checks": [{"grows": "counts.floor", "by": 1}],
-      "reference": [{"id": "floor", "params": {"boundary": [[0, 0], [4000, 0], [4000, 3000], [0, 3000]]}}]
+      "checks": [
+        {
+          "grows": "counts.floor",
+          "by": 1
+        }
+      ],
+      "reference": [
+        {
+          "id": "floor",
+          "params": {
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                4000,
+                0
+              ],
+              [
+                4000,
+                3000
+              ],
+              [
+                0,
+                3000
+              ]
+            ]
+          }
+        }
+      ]
     },
     {
       "name": "bim-delete-walls",
       "mode": "bim",
       "setup": [
-        {"id": "wall", "params": {"points": [[0, 0], [4000, 0]]}},
-        {"id": "wall", "params": {"points": [[0, 5000], [4000, 5000]]}},
-        {"id": "level", "params": {"elevation": 6000, "name": "Roof"}}
+        {
+          "id": "wall",
+          "params": {
+            "points": [
+              [
+                0,
+                0
+              ],
+              [
+                4000,
+                0
+              ]
+            ]
+          }
+        },
+        {
+          "id": "wall",
+          "params": {
+            "points": [
+              [
+                0,
+                5000
+              ],
+              [
+                4000,
+                5000
+              ]
+            ]
+          }
+        },
+        {
+          "id": "level",
+          "params": {
+            "elevation": 6000,
+            "name": "Roof"
+          }
+        }
       ],
       "request": "Delete all the walls.",
       "checks": [
-        {"equals": "counts.wall", "value": 0},
-        {"has": "levels.*.name", "value": "Roof", "why": "the level stays"}
+        {
+          "equals": "counts.wall",
+          "value": 0
+        },
+        {
+          "has": "levels.*.name",
+          "value": "Roof",
+          "why": "the level stays"
+        }
       ],
-      "reference": [{"id": "delete", "params": {"ids": "$state:ids.wall"}}]
+      "reference": [
+        {
+          "id": "delete",
+          "params": {
+            "ids": "$state:ids.wall"
+          }
+        }
+      ]
     },
     {
       "name": "bim-question",
       "mode": "bim",
       "request": "How many levels does this project have?",
-      "checks": [{"no_commands": true}]
+      "checks": [
+        {
+          "no_commands": true
+        }
+      ]
+    },
+    {
+      "name": "cad-hard-round-table",
+      "mode": "cad",
+      "level": "hard",
+      "request": "Draw a round table, a circle of radius 600 at 0,0, with 6 chairs (circles of radius 200) evenly spaced around it, their centres 900 from the table's centre.",
+      "checks": [
+        {
+          "any_of": [
+            {
+              "grows": "counts.Circle",
+              "by": 7
+            },
+            {
+              "all_of": [
+                {
+                  "grows": "counts.Circle",
+                  "by": 2
+                },
+                {
+                  "grows": "counts.Block Reference",
+                  "by": 1
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "near": "extents.1.0",
+          "value": 1100,
+          "tol": 125,
+          "why": "the chairs reach 1100 out"
+        }
+      ],
+      "reference": [
+        {
+          "id": "circle",
+          "params": {
+            "center": [
+              0,
+              0
+            ],
+            "radius": 600
+          }
+        },
+        {
+          "id": "circle",
+          "params": {
+            "center": [
+              900,
+              0
+            ],
+            "radius": 200
+          }
+        },
+        {
+          "id": "select",
+          "params": {
+            "window": [
+              [
+                690,
+                -210
+              ],
+              [
+                1110,
+                210
+              ]
+            ]
+          }
+        },
+        {
+          "id": "arraypolar",
+          "params": {
+            "center": [
+              0,
+              0
+            ],
+            "count": 6,
+            "associative": false
+          }
+        }
+      ]
+    },
+    {
+      "name": "cad-hard-grid",
+      "mode": "cad",
+      "level": "hard",
+      "request": "Draw a grid of circles of radius 50, 3 rows by 4 columns, 500 apart both ways, the first centred at 0,0 and the grid going right and up.",
+      "checks": [
+        {
+          "any_of": [
+            {
+              "grows": "counts.Circle",
+              "by": 12
+            },
+            {
+              "all_of": [
+                {
+                  "grows": "counts.Circle",
+                  "by": 1
+                },
+                {
+                  "grows": "counts.Block Reference",
+                  "by": 1
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "near": "extents.1.0",
+          "value": 1550,
+          "tol": 1
+        },
+        {
+          "near": "extents.1.1",
+          "value": 1050,
+          "tol": 1
+        }
+      ],
+      "reference": [
+        {
+          "id": "circle",
+          "params": {
+            "center": [
+              0,
+              0
+            ],
+            "radius": 50
+          }
+        },
+        {
+          "id": "select",
+          "params": {
+            "window": [
+              [
+                -60,
+                -60
+              ],
+              [
+                60,
+                60
+              ]
+            ]
+          }
+        },
+        {
+          "id": "arrayrect",
+          "params": {
+            "rows": 3,
+            "cols": 4,
+            "rowSpacing": 500,
+            "colSpacing": 500,
+            "associative": false
+          }
+        }
+      ]
+    },
+    {
+      "name": "cad-hard-layer-the-circles",
+      "mode": "cad",
+      "level": "hard",
+      "setup": [
+        {
+          "id": "circle",
+          "params": {
+            "center": [
+              0,
+              0
+            ],
+            "radius": 100
+          }
+        },
+        {
+          "id": "circle",
+          "params": {
+            "center": [
+              500,
+              0
+            ],
+            "radius": 100
+          }
+        },
+        {
+          "id": "line",
+          "params": {
+            "points": [
+              [
+                0,
+                -500
+              ],
+              [
+                500,
+                -500
+              ]
+            ]
+          }
+        }
+      ],
+      "request": "Put all the circles on a new layer called FURNITURE, coloured blue.",
+      "checks": [
+        {
+          "has": "layers.*.name",
+          "value": "FURNITURE"
+        },
+        {
+          "equals": "count",
+          "value": 2,
+          "in": {
+            "id": "entities",
+            "params": {
+              "type": "circle",
+              "layer": "FURNITURE"
+            }
+          }
+        },
+        {
+          "equals": "count",
+          "value": 1,
+          "in": {
+            "id": "entities",
+            "params": {
+              "type": "line",
+              "layer": "0"
+            }
+          },
+          "why": "the line stays on 0"
+        }
+      ],
+      "reference": [
+        {
+          "id": "layer.new",
+          "params": {
+            "name": "FURNITURE",
+            "color": "blue"
+          }
+        },
+        {
+          "id": "qselect",
+          "params": {
+            "type": "Circle"
+          }
+        },
+        {
+          "id": "properties.set",
+          "params": {
+            "layer": "FURNITURE"
+          }
+        }
+      ]
+    },
+    {
+      "name": "cad-hard-offset-walls",
+      "mode": "cad",
+      "level": "hard",
+      "setup": [
+        {
+          "id": "rectang",
+          "params": {
+            "p1": [
+              0,
+              0
+            ],
+            "p2": [
+              4000,
+              3000
+            ]
+          }
+        }
+      ],
+      "request": "Offset the rectangle 230 outwards to show the walls' thickness.",
+      "checks": [
+        {
+          "grows": "counts.Polyline",
+          "by": 1
+        },
+        {
+          "near": "extents.0.0",
+          "value": -230,
+          "tol": 1
+        },
+        {
+          "near": "extents.1.1",
+          "value": 3230,
+          "tol": 1
+        }
+      ],
+      "reference": [
+        {
+          "id": "offset",
+          "params": {
+            "handle": "$state:entities.0.handle",
+            "distance": 230,
+            "side": [
+              5000,
+              5000
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "cad-hard-dimension-box",
+      "mode": "cad",
+      "level": "hard",
+      "setup": [
+        {
+          "id": "rectang",
+          "params": {
+            "p1": [
+              0,
+              0
+            ],
+            "p2": [
+              4000,
+              3000
+            ]
+          }
+        }
+      ],
+      "request": "Dimension the rectangle: its width along the bottom and its height along the right side, both 500 away from it.",
+      "checks": [
+        {
+          "grows": "counts.Dimension",
+          "by": 2
+        },
+        {
+          "near": "extents.0.1",
+          "value": -500,
+          "tol": 200,
+          "why": "the width's dimension below it"
+        },
+        {
+          "near": "extents.1.0",
+          "value": 4500,
+          "tol": 200,
+          "why": "the height's dimension to its right"
+        }
+      ],
+      "reference": [
+        {
+          "id": "dimlinear",
+          "params": {
+            "p1": [
+              0,
+              0
+            ],
+            "p2": [
+              4000,
+              0
+            ],
+            "at": [
+              2000,
+              -500
+            ]
+          }
+        },
+        {
+          "id": "dimlinear",
+          "params": {
+            "p1": [
+              4000,
+              0
+            ],
+            "p2": [
+              4000,
+              3000
+            ],
+            "at": [
+              4500,
+              1500
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "cad-hard-room-labels",
+      "mode": "cad",
+      "level": "hard",
+      "setup": [
+        {
+          "id": "rectang",
+          "params": {
+            "p1": [
+              0,
+              0
+            ],
+            "p2": [
+              3000,
+              3000
+            ]
+          }
+        },
+        {
+          "id": "rectang",
+          "params": {
+            "p1": [
+              3000,
+              0
+            ],
+            "p2": [
+              6000,
+              3000
+            ]
+          }
+        }
+      ],
+      "request": "Label the left square BEDROOM and the right one KITCHEN, each centred in its square, 200 high.",
+      "checks": [
+        {
+          "any_of": [
+            {
+              "grows": "counts.Text",
+              "by": 2
+            },
+            {
+              "grows": "counts.MText",
+              "by": 2
+            }
+          ]
+        },
+        {
+          "any_of": [
+            {
+              "equals": "count",
+              "value": 1,
+              "in": {
+                "id": "entities",
+                "params": {
+                  "type": "text",
+                  "window": [
+                    [
+                      0,
+                      0
+                    ],
+                    [
+                      3000,
+                      3000
+                    ]
+                  ],
+                  "crossing": false
+                }
+              }
+            },
+            {
+              "equals": "count",
+              "value": 1,
+              "in": {
+                "id": "entities",
+                "params": {
+                  "type": "mtext",
+                  "window": [
+                    [
+                      0,
+                      0
+                    ],
+                    [
+                      3000,
+                      3000
+                    ]
+                  ],
+                  "crossing": false
+                }
+              }
+            }
+          ],
+          "why": "one label inside the left square"
+        }
+      ],
+      "reference": [
+        {
+          "id": "text",
+          "params": {
+            "at": [
+              1500,
+              1500
+            ],
+            "text": "BEDROOM",
+            "height": 200,
+            "justify": "MC"
+          }
+        },
+        {
+          "id": "text",
+          "params": {
+            "at": [
+              4500,
+              1500
+            ],
+            "text": "KITCHEN",
+            "height": 200,
+            "justify": "MC"
+          }
+        }
+      ]
+    },
+    {
+      "name": "bim-hard-small-house",
+      "mode": "bim",
+      "level": "hard",
+      "request": "Build a 6 x 4 m one-room house with its south-west corner at the origin: four walls, a door in the middle of the south wall, a window in the middle of each of the other three walls, a floor, and a room named Living.",
+      "checks": [
+        {
+          "grows": "counts.wall",
+          "by": 4
+        },
+        {
+          "grows": "counts.door",
+          "by": 1
+        },
+        {
+          "grows": "counts.window",
+          "by": 3
+        },
+        {
+          "grows": "counts.floor",
+          "by": 1
+        },
+        {
+          "grows": "counts.room",
+          "by": 1
+        },
+        {
+          "has": "elements.*.name",
+          "value": "Living",
+          "in": {
+            "id": "elements",
+            "params": {
+              "category": "room"
+            }
+          }
+        }
+      ],
+      "reference": [
+        {
+          "id": "wall",
+          "params": {
+            "points": [
+              [
+                0,
+                0
+              ],
+              [
+                6000,
+                0
+              ],
+              [
+                6000,
+                4000
+              ],
+              [
+                0,
+                4000
+              ]
+            ],
+            "closed": true
+          }
+        },
+        {
+          "id": "door",
+          "params": {
+            "at": [
+              3000,
+              0
+            ]
+          }
+        },
+        {
+          "id": "window",
+          "params": {
+            "at": [
+              6000,
+              2000
+            ]
+          }
+        },
+        {
+          "id": "window",
+          "params": {
+            "at": [
+              3000,
+              4000
+            ]
+          }
+        },
+        {
+          "id": "window",
+          "params": {
+            "at": [
+              0,
+              2000
+            ]
+          }
+        },
+        {
+          "id": "floor",
+          "params": {
+            "boundary": [
+              [
+                0,
+                0
+              ],
+              [
+                6000,
+                0
+              ],
+              [
+                6000,
+                4000
+              ],
+              [
+                0,
+                4000
+              ]
+            ]
+          }
+        },
+        {
+          "id": "room",
+          "params": {
+            "point": [
+              3000,
+              2000
+            ],
+            "name": "Living"
+          }
+        }
+      ]
+    },
+    {
+      "name": "bim-hard-two-rooms",
+      "mode": "bim",
+      "level": "hard",
+      "request": "Draw an 8 x 4 m box of walls from the origin with a wall across it at x = 4000, and make the two rooms: Bedroom on the west, Bathroom on the east.",
+      "checks": [
+        {
+          "grows": "counts.wall",
+          "at_least": 5
+        },
+        {
+          "grows": "counts.room",
+          "by": 2
+        },
+        {
+          "has": "elements.*.name",
+          "value": "Bedroom",
+          "in": {
+            "id": "elements",
+            "params": {
+              "category": "room"
+            }
+          }
+        },
+        {
+          "has": "elements.*.name",
+          "value": "Bathroom",
+          "in": {
+            "id": "elements",
+            "params": {
+              "category": "room"
+            }
+          }
+        }
+      ],
+      "reference": [
+        {
+          "id": "wall",
+          "params": {
+            "points": [
+              [
+                0,
+                0
+              ],
+              [
+                8000,
+                0
+              ],
+              [
+                8000,
+                4000
+              ],
+              [
+                0,
+                4000
+              ]
+            ],
+            "closed": true
+          }
+        },
+        {
+          "id": "wall",
+          "params": {
+            "points": [
+              [
+                4000,
+                0
+              ],
+              [
+                4000,
+                4000
+              ]
+            ]
+          }
+        },
+        {
+          "id": "room",
+          "params": {
+            "point": [
+              2000,
+              2000
+            ],
+            "name": "Bedroom"
+          }
+        },
+        {
+          "id": "room",
+          "params": {
+            "point": [
+              6000,
+              2000
+            ],
+            "name": "Bathroom"
+          }
+        }
+      ]
+    },
+    {
+      "name": "bim-hard-new-level",
+      "mode": "bim",
+      "level": "hard",
+      "request": "Add a level called Level 3, 3000 mm above the highest level, and draw a 5 x 5 m box of walls on it starting at the origin.",
+      "checks": [
+        {
+          "has": "levels.*.name",
+          "value": "Level 3"
+        },
+        {
+          "has": "levels.*.elevation",
+          "value": 6000
+        },
+        {
+          "equals": "count",
+          "value": 4,
+          "in": {
+            "id": "elements",
+            "params": {
+              "category": "wall",
+              "level": "Level 3"
+            }
+          },
+          "why": "the walls on Level 3"
+        }
+      ],
+      "reference": [
+        {
+          "id": "level",
+          "params": {
+            "elevation": 6000,
+            "name": "Level 3"
+          }
+        },
+        {
+          "id": "wall",
+          "params": {
+            "points": [
+              [
+                0,
+                0
+              ],
+              [
+                5000,
+                0
+              ],
+              [
+                5000,
+                5000
+              ],
+              [
+                0,
+                5000
+              ]
+            ],
+            "closed": true,
+            "level": "Level 3"
+          }
+        }
+      ]
+    },
+    {
+      "name": "bim-hard-move-door",
+      "mode": "bim",
+      "level": "hard",
+      "setup": [
+        {
+          "id": "wall",
+          "params": {
+            "points": [
+              [
+                0,
+                0
+              ],
+              [
+                6000,
+                0
+              ]
+            ]
+          }
+        },
+        {
+          "id": "door",
+          "params": {
+            "at": [
+              1000,
+              0
+            ]
+          }
+        }
+      ],
+      "request": "Move the door so its centre is 4500 mm from the wall's start.",
+      "checks": [
+        {
+          "near": "elements.0.offset",
+          "value": 4500,
+          "tol": 5,
+          "in": {
+            "id": "elements",
+            "params": {
+              "category": "door"
+            }
+          }
+        },
+        {
+          "equals": "counts.door",
+          "value": 1
+        }
+      ],
+      "reference": [
+        {
+          "id": "modify",
+          "params": {
+            "id": "$state:ids.door.0",
+            "offset": 4500
+          }
+        }
+      ]
+    },
+    {
+      "name": "bim-hard-rename-room",
+      "mode": "bim",
+      "level": "hard",
+      "setup": [
+        {
+          "id": "wall",
+          "params": {
+            "points": [
+              [
+                0,
+                0
+              ],
+              [
+                4000,
+                0
+              ],
+              [
+                4000,
+                3000
+              ],
+              [
+                0,
+                3000
+              ]
+            ],
+            "closed": true
+          }
+        },
+        {
+          "id": "room",
+          "params": {
+            "point": [
+              2000,
+              1500
+            ],
+            "name": "Room"
+          }
+        }
+      ],
+      "request": "Rename the room to Master Bedroom.",
+      "checks": [
+        {
+          "has": "elements.*.name",
+          "value": "Master Bedroom",
+          "in": {
+            "id": "elements",
+            "params": {
+              "category": "room"
+            }
+          }
+        },
+        {
+          "equals": "counts.room",
+          "value": 1
+        }
+      ],
+      "reference": [
+        {
+          "id": "modify",
+          "params": {
+            "id": "$state:ids.room.0",
+            "name": "Master Bedroom"
+          }
+        }
+      ]
     }
   ]
 }

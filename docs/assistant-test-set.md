@@ -56,13 +56,23 @@ A check reads the state the assistant was sent: AptCAD's `drawing.inspect`, or A
 | `{"near": PATH, "value": x, "tol": t}` | the number at PATH is within t of x |
 | `{"no_commands": true}` | the model gave no commands (a question) |
 | `{"any_of": [checks]}` | one of them holds |
+| `{"all_of": [checks]}` | all of them hold (inside an `any_of`: "7 circles, or 2 and an array") |
 
 A path is dotted: `counts.Circle`, `layers.*.name` (`*` takes every member), `extents.1.0` (the second item's
 first).
 
-The set has 9 drafting and 8 modelling cases. They cover drawing, layers, text and dimensions, and selecting before
-a change (erase or move by type). On the modelling side: walls, levels, doors and windows in a wall, a named room, a
-floor, deleting by id. Each mode also has one plain question, which must be answered without commands.
+A case with `"level": "hard"` is one of the harder requests, which the report scores apart.
+
+The set has 17 basic cases (9 drafting, 8 modelling) and 11 hard ones (6 drafting, 5 modelling). The basic ones are about drawing, layers, text and dimensions, and selecting before a change (erase or move by type). On the modelling
+side: walls, levels, doors and windows in a wall, a named room, a floor, deleting by id. Each mode also has one plain
+question, which must be answered without commands.
+
+The hard ones take several steps, or work on what is already drawn, where the basic set stopped telling the models
+apart:
+- Drafting: chairs round a table (a polar array of a selected circle), a grid of circles, the circles moved to a new
+  layer, a rectangle offset outwards, both sides of a rectangle dimensioned, two rooms labelled in their middles.
+- Modelling: a one-room house (walls, a door, three windows, a floor, a named room), a box split into two named
+  rooms, a new level with walls on it, a door moved along its wall, a room renamed.
 
 ## Tuning the prompt
 

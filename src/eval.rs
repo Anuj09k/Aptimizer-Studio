@@ -45,6 +45,8 @@ pub struct Case {
     /// Commands run before the request, so it has something to work on.
     pub setup: Vec<(String, Value)>,
     pub checks: Vec<Value>,
+    /// One of the harder requests: several steps, or work on what is already drawn.
+    pub hard: bool,
     /// Commands a right answer could give.
     pub reference: Vec<(String, Value)>,
 }
@@ -93,6 +95,7 @@ pub fn read_cases(text: &str) -> Result<Vec<Case>, String> {
             request,
             setup: commands(&c["setup"]),
             checks,
+            hard: c["level"].as_str() == Some("hard"),
             reference: commands(&c["reference"]),
         });
     }
@@ -238,8 +241,10 @@ fn queries(
         if let Some(v) = query(host, c) {
             into.insert(key.clone(), v);
         }
-        if let Some(any) = c["any_of"].as_array() {
-            queries(host, any, into, &format!("{key}."));
+        for nested in ["any_of", "all_of"] {
+            if let Some(subs) = c[nested].as_array() {
+                queries(host, subs, into, &format!("{key}."));
+            }
         }
     }
 }
@@ -276,6 +281,20 @@ fn check(
             }
         }
         return Err(format!("none of: {}{why}", misses.join("; ")));
+    }
+    if let Some(all) = c["all_of"].as_array() {
+        for (i, sub) in all.iter().enumerate() {
+            check(
+                sub,
+                &format!("{key}.{i}"),
+                state,
+                before_q,
+                after_q,
+                proposed,
+            )
+            .map_err(|e| format!("{e}{why}"))?;
+        }
+        return Ok(());
     }
     if c["no_commands"].as_bool() == Some(true) {
         return if proposed == 0 {
@@ -347,6 +366,7 @@ struct Attempt {
 pub struct Outcome {
     pub name: String,
     pub target: Target,
+    pub hard: bool,
     pub first: bool,
     pub last: bool,
     pub attempts: Vec<Value>,
@@ -402,6 +422,7 @@ pub fn run_case(case: &Case, source: &mut dyn Source) -> Outcome {
     let mut out = Outcome {
         name: case.name.clone(),
         target: case.target,
+        hard: case.hard,
         first: false,
         last: false,
         attempts: Vec::new(),
@@ -552,13 +573,19 @@ fn report(outcomes: &[Outcome], source: &str) -> String {
         md,
         "**{first} of {n}** pass on the first answer, **{last} of {n}** after the fixes asked for by themselves (at most {AUTO_FIXES}).\n"
     );
-    for t in [Target::Cad, Target::Bim] {
-        let of: Vec<&Outcome> = outcomes.iter().filter(|o| o.target == t).collect();
+    let groups: [(&str, fn(&Outcome) -> bool); 4] = [
+        ("cad", |o| o.target == Target::Cad),
+        ("bim", |o| o.target == Target::Bim),
+        ("the basic requests", |o| !o.hard),
+        ("the hard requests", |o| o.hard),
+    ];
+    for (name, keep) in groups {
+        let of: Vec<&Outcome> = outcomes.iter().filter(|o| keep(o)).collect();
         if !of.is_empty() {
             let _ = writeln!(
                 md,
                 "- {}: {} of {} first, {} of {} after fixes",
-                code(t),
+                name,
                 of.iter().filter(|o| o.first).count(),
                 of.len(),
                 of.iter().filter(|o| o.last).count(),
@@ -591,7 +618,7 @@ fn write(out: &Path, outcomes: &[Outcome], source: &str) -> Result<(), String> {
     std::fs::create_dir_all(out).map_err(|e| format!("{}: {e}", out.display()))?;
     let results = json!({
         "source": source,
-        "cases": outcomes.iter().map(|o| json!({"name": o.name, "mode": code(o.target), "first": o.first, "last": o.last, "problems": o.problems, "attempts": o.attempts})).collect::<Vec<_>>(),
+        "cases": outcomes.iter().map(|o| json!({"name": o.name, "mode": code(o.target), "hard": o.hard, "first": o.first, "last": o.last, "problems": o.problems, "attempts": o.attempts})).collect::<Vec<_>>(),
     });
     let pretty = serde_json::to_string_pretty(&results).map_err(|e| e.to_string())?;
     std::fs::write(out.join("results.json"), pretty).map_err(|e| format!("results.json: {e}"))?;
@@ -728,6 +755,10 @@ mod tests {
         let cases = cases.unwrap_or_default();
         assert!(cases.iter().filter(|c| c.target == Target::Cad).count() >= 6);
         assert!(cases.iter().filter(|c| c.target == Target::Bim).count() >= 6);
+        assert!(
+            cases.iter().filter(|c| c.hard).count() >= 10,
+            "the harder requests"
+        );
         let mut source = Reference(
             cases
                 .iter()
