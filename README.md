@@ -85,7 +85,7 @@ cargo packager --release
 ```
 
 - Windows: an NSIS installer (`.exe`)
-- macOS: an application bundle (`.app`) and disk image (`.dmg`)
+- macOS: separate Apple silicon and Intel application bundles (`.app`) and disk images (`.dmg`)
 - Linux: a Debian package (`.deb`), AppImage, and Arch package (`.tar.gz` and `PKGBUILD`)
 
 Installers register supported drawing and building-model file types with the desktop environment. The Linux `.deb`
