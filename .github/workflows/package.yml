@@ -1,0 +1,43 @@
+name: Package installers
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-14, windows-2022]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install Linux build libraries
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libxkbcommon-dev libwayland-dev libfontconfig1-dev libgtk-3-dev
+      - name: Access to AptBIM's private repository
+        shell: bash
+        env:
+          TOKEN: ${{ secrets.APTBIM_TOKEN }}
+        run: |
+          if [ -z "$TOKEN" ]; then echo "::error::Add the APTBIM_TOKEN secret with read access to Anuj09k/AptBIM-"; exit 1; fi
+          git config --global url."https://x-access-token:${TOKEN}@github.com/Anuj09k/AptBIM-".insteadOf "https://github.com/Anuj09k/AptBIM-"
+      - uses: Swatinem/rust-cache@v2
+      - name: Install NSIS
+        if: runner.os == 'Windows'
+        run: choco install nsis --yes --no-progress
+      - name: Install Cargo Packager
+        run: cargo install cargo-packager --locked --version 0.11.8
+      - name: Build installers
+        run: cargo packager --release
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aptimizer-studio-${{ runner.os }}-${{ runner.arch }}
+          path: dist/**
+          if-no-files-found: error
