@@ -3,6 +3,7 @@ name: Package installers
 on:
   workflow_dispatch:
   push:
+    branches: [main, codex/package-installers]
     tags: ["v*"]
 
 permissions:
