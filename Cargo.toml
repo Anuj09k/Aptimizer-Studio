@@ -59,3 +59,40 @@ egui_glow = { git = "https://github.com/storytold/egui.git", rev = "6d518fc79968
 egui_system_font_provider = { git = "https://github.com/storytold/egui.git", rev = "6d518fc799681571963842f95b55a6b68431b15a" }
 eframe = { git = "https://github.com/storytold/egui.git", rev = "6d518fc799681571963842f95b55a6b68431b15a" }
 winit = { git = "https://github.com/storytold/winit.git", rev = "a517b3846ee8457d84ee4975110bfda6797c44dc" }
+
+[package.metadata.packager]
+product-name = "Aptimizer Studio"
+identifier = "io.github.anuj09k.aptimizer-studio"
+publisher = "Aptimizer"
+authors = ["Aptimizer"]
+description = "AptCAD drafting and AptBIM building modelling in one desktop app."
+homepage = "https://github.com/Anuj09k/Aptimizer-Studio"
+category = "GraphicsAndDesign"
+license-file = "LICENSE-APACHE"
+icons = ["assets/studio-256.png"]
+resources = ["LICENSE-APACHE", "NOTICE"]
+formats = ["default"]
+out-dir = "dist"
+binaries-dir = "target/release"
+before-packaging-command = "cargo build --release --locked"
+
+[[package.metadata.packager.file-associations]]
+extensions = ["dxf", "dwg", "dwt"]
+mime-type = "application/x-aptimizer-cad"
+description = "Aptimizer Studio CAD drawing"
+name = "Aptimizer Studio CAD drawing"
+
+[[package.metadata.packager.file-associations]]
+extensions = ["svg", "svgz"]
+mime-type = "image/svg+xml"
+description = "Aptimizer Studio vector drawing"
+name = "Aptimizer Studio vector drawing"
+
+[[package.metadata.packager.file-associations]]
+extensions = ["aptbim", "ifc", "rvt"]
+mime-type = "application/x-aptimizer-bim"
+description = "Aptimizer Studio building model"
+name = "Aptimizer Studio building model"
+
+[package.metadata.packager.deb]
+depends = ["libfontconfig1", "libgtk-3-0", "libvulkan1", "libwayland-client0", "libxkbcommon0"]

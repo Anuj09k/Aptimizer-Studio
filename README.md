@@ -76,13 +76,28 @@ layout viewports on the processor, as its web build does.
 
 ## Builds
 
-`.github/workflows/build.yml` tests and builds the app on Linux, macOS and Windows on every push and keeps each build as
-a workflow artifact. It needs a repository secret, `APTBIM_TOKEN`: a GitHub token that can read
+Install Rust 1.95 or newer and the packager, then run `cargo packager --release`. This builds the app and creates the
+platform's desktop packages under `dist/`:
+
+```sh
+cargo install cargo-packager --locked --version 0.11.8
+cargo packager --release
+```
+
+- Windows: an NSIS installer (`.exe`)
+- macOS: an application bundle (`.app`) and disk image (`.dmg`)
+- Linux: a Debian package (`.deb`), AppImage, and Arch package (`.tar.gz` and `PKGBUILD`)
+
+Installers register supported drawing and building-model file types with the desktop environment. The Linux `.deb`
+declares GTK, font, Vulkan, Wayland, and XKB runtime libraries as dependencies.
+
+`.github/workflows/build.yml` builds and packages the app on Linux, macOS and Windows on every push and keeps each
+platform's packages as a workflow artifact. It needs a repository secret, `APTBIM_TOKEN`: a GitHub token that can read
 `Anuj09k/AptBIM-` (see the top of the workflow).
 
 ## Not yet
 
-- One installer and an updater for the studio (each app has its own; this program uses neither yet).
+- An updater for the studio (the component apps' updaters aren't used here).
 - Closing the window from one mode doesn't ask about unsaved work in the other: save in both before quitting.
 - AptCAD's macOS system menu bar: in the studio its menus stay inside the window.
 - Opening an AptBIM view in AptCAD, and linking an AptCAD drawing into AptBIM, without going through files.
